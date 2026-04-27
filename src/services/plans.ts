@@ -126,7 +126,7 @@ export const plansService = {
     if (active) return active
 
     const first = allPlans[0]
-    if (!first?.id) {
+    if (!first.id) {
       const initial = buildDefaultPlan()
       const id = await db.plans.add(initial)
       return { id: Number(id), ...initial }
@@ -194,12 +194,14 @@ export const plansService = {
 
     await db.transaction(
       'rw',
-      db.plans,
-      db.daily_blocks,
-      db.writing_entries,
-      db.resource_categories,
-      db.resources,
-      db.monthly_reviews,
+      [
+        db.plans,
+        db.daily_blocks,
+        db.writing_entries,
+        db.resource_categories,
+        db.resources,
+        db.monthly_reviews,
+      ],
       async () => {
         await db.daily_blocks.where('plan_id').equals(id).delete()
         await db.writing_entries.where('plan_id').equals(id).delete()

@@ -511,7 +511,7 @@ function PlanBuilder() {
 
       <Modal
         open={blocker.status === 'blocked'}
-        onClose={() => blocker.reset()}
+        onClose={() => blocker.reset?.()}
         title="Unsaved changes"
       >
         <p className="text-sm text-on-surface-variant leading-relaxed mb-4">
@@ -521,14 +521,14 @@ function PlanBuilder() {
         <div className="flex gap-3">
           <button
             type="button"
-            onClick={() => blocker.reset()}
+            onClick={() => blocker.reset?.()}
             className="cursor-pointer flex-1 py-2.5 rounded-lg border border-outline-variant text-sm font-semibold text-on-surface-variant hover:bg-surface-low transition-colors"
           >
             Stay here
           </button>
           <button
             type="button"
-            onClick={() => blocker.proceed()}
+            onClick={() => blocker.proceed?.()}
             className="cursor-pointer flex-1 py-2.5 rounded-lg bg-primary-dark text-white text-sm font-semibold hover:bg-primary-dark-hover transition-colors"
           >
             Leave page

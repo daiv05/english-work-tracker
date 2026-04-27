@@ -45,7 +45,7 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
     await plansService.update(activePlanId, { daily_goal_minutes: minutes })
     const plans = await plansService.list()
     const active = plans.find((plan) => plan.is_active) ?? plans[0]
-    set({ plans, activePlanId: active?.id })
+    set({ plans, activePlanId: active.id })
   },
 
   async updateActivePlan(changes) {
@@ -54,14 +54,14 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
     await plansService.update(activePlanId, changes)
     const plans = await plansService.list()
     const active = plans.find((plan) => plan.is_active) ?? plans[0]
-    set({ plans, activePlanId: active?.id })
+    set({ plans, activePlanId: active.id })
   },
 
   async setActivePlan(planId) {
     await plansService.setActive(planId)
     const plans = await plansService.list()
     const active = plans.find((plan) => plan.is_active) ?? plans.find((plan) => plan.id === planId) ?? plans[0]
-    set({ plans, activePlanId: active?.id })
+    set({ plans, activePlanId: active.id })
   },
 
   async createPlan(name) {
@@ -70,14 +70,14 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
     await plansService.create({ name: trimmed })
     const plans = await plansService.list()
     const active = plans.find((p) => p.is_active) ?? plans[0]
-    set({ plans, activePlanId: active?.id })
+    set({ plans, activePlanId: active.id })
   },
 
   async deletePlan(planId) {
     await plansService.delete(planId)
     const plans = await plansService.list()
     const active = plans.find((p) => p.is_active) ?? plans[0]
-    set({ plans, activePlanId: active?.id })
+    set({ plans, activePlanId: active.id })
   },
 
   async _init() {
@@ -86,7 +86,7 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
       await plansService.ensureDefaultPlan()
       const plans = await plansService.list()
       const active = plans.find((plan) => plan.is_active) ?? plans[0]
-      set({ ...profile, plans, activePlanId: active?.id, isInitialized: true })
+      set({ ...profile, plans, activePlanId: active.id, isInitialized: true })
     } catch {
       set({ isInitialized: true })
     }

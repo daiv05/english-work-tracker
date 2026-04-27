@@ -3,6 +3,8 @@ import { profileService } from '#/services/profile'
 import { plansService } from '#/services/plans'
 import type { StudyPlan, UserProfile } from '#/services/types'
 
+let _initPromise: Promise<void> | null = null
+
 interface ProfileStore extends UserProfile {
   plans: StudyPlan[]
   activePlanId?: number
@@ -80,15 +82,21 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
     set({ plans, activePlanId: active.id })
   },
 
-  async _init() {
-    try {
-      const profile = profileService.get()
-      await plansService.ensureDefaultPlan()
-      const plans = await plansService.list()
-      const active = plans.find((plan) => plan.is_active) ?? plans[0]
-      set({ ...profile, plans, activePlanId: active.id, isInitialized: true })
-    } catch {
-      set({ isInitialized: true })
+  _init() {
+    if (!_initPromise) {
+      _initPromise = (async () => {
+        try {
+          const profile = profileService.get()
+          await plansService.ensureDefaultPlan()
+          const plans = await plansService.list()
+          const active = plans.find((plan) => plan.is_active) ?? plans[0]
+          set({ ...profile, plans, activePlanId: active.id, isInitialized: true })
+        } catch {
+          _initPromise = null
+          set({ isInitialized: true })
+        }
+      })()
     }
+    return _initPromise
   },
 }))

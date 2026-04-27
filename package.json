@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "lint": "eslint --ext .ts,.tsx src --fix",
-    "format": "prettier --check ./src --write"
+    "format": "prettier --check ./src --write",
+    "types": "tsc --noEmit"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",

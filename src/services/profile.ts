@@ -8,7 +8,6 @@ const STORAGE_KEY = 'ew_profile'
 
 const DEFAULTS: UserProfile = {
   username: 'You',
-  goalMinutesPerDay: 90,
 }
 
 export const profileService = {

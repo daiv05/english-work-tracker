@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { ProgressBar } from '#/components/ui/ProgressBar'
 import { typeConfig } from '#/components/ui/ActivityTypeChip'
@@ -11,12 +12,122 @@ import {
 } from '#/db/hooks'
 import { useProfileStore } from '#/store/profile'
 import { todayStr } from '#/lib/streak'
+import type { WeeklyPlanTemplate, PlanTemplateBlock } from '#/services/types'
+import type { DailyBlock } from '#/db/index'
 
 export const Route = createFileRoute('/')({
   component: Dashboard,
 })
 
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+
+function TodaysPlanCard({
+  activePlanTemplate,
+  dayName,
+  blocks,
+}: {
+  activePlanTemplate: WeeklyPlanTemplate | null
+  dayName: string
+  blocks: DailyBlock[]
+}) {
+  const plannedBlocks: PlanTemplateBlock[] = activePlanTemplate?.[dayName] ?? []
+
+  // Sum logged minutes per activity type
+  const loggedByType: Record<string, number> = {}
+  for (const b of blocks) {
+    loggedByType[b.type] = (loggedByType[b.type] ?? 0) + b.duration_minutes
+  }
+
+  const totalPlanned = plannedBlocks.reduce((s, b) => s + b.minutes, 0)
+  const totalLogged = Math.min(
+    plannedBlocks.reduce((s, b) => s + Math.min(loggedByType[b.block] ?? 0, b.minutes), 0),
+    totalPlanned,
+  )
+  const blocksDone = plannedBlocks.filter((b) => (loggedByType[b.block] ?? 0) >= b.minutes).length
+
+  const dayLabel = dayName.charAt(0).toUpperCase() + dayName.slice(1)
+
+  return (
+    <div className="md:col-span-12 bg-white border border-outline-variant rounded-2xl p-6 shadow-card">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-outline mb-1">
+            Today's Plan
+          </p>
+          <span className="inline-block text-xs font-semibold bg-secondary/10 text-secondary px-2 py-0.5 rounded-full">
+            {dayLabel}
+          </span>
+        </div>
+        {totalPlanned > 0 && (
+          <p className="text-xs text-outline">
+            <span className="font-semibold text-on-surface">{totalLogged}</span>
+            {' / '}{totalPlanned} min
+            {' · '}
+            <span className="font-semibold text-on-surface">{blocksDone}</span>
+            /{plannedBlocks.length} blocks done
+          </p>
+        )}
+      </div>
+
+      {plannedBlocks.length === 0 ? (
+        <p className="text-sm text-outline text-center py-4">
+          No plan template for {dayLabel}. You can set one in the{' '}
+          <Link to="/plan" className="text-tertiary font-semibold hover:underline">
+            Plan Builder
+          </Link>
+          .
+        </p>
+      ) : (
+        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+          {plannedBlocks.map((b, i) => {
+            const logged = loggedByType[b.block] ?? 0
+            const done = logged >= b.minutes
+            const pct = Math.min(100, b.minutes > 0 ? (logged / b.minutes) * 100 : 0)
+            const cfg = typeConfig[b.block] ?? typeConfig.Other
+            return (
+              <li
+                key={i}
+                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 border transition-colors ${
+                  done
+                    ? 'bg-secondary/5 border-secondary/20'
+                    : 'bg-surface-low border-transparent'
+                }`}
+              >
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${cfg.bg}`}>
+                  <span className={`w-2.5 h-2.5 rounded-full ${cfg.dot}`} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-1 mb-1">
+                    <span className="text-xs font-semibold text-on-surface truncate">
+                      {b.label || b.block}
+                    </span>
+                    {done ? (
+                      <span className="text-secondary shrink-0">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </span>
+                    ) : (
+                      <span className="text-[10px] text-outline whitespace-nowrap shrink-0">
+                        {logged > 0 ? `${logged}/` : ''}{b.minutes}m
+                      </span>
+                    )}
+                  </div>
+                  <div className="w-full h-1 rounded-full bg-surface-high overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${done ? 'bg-secondary' : 'bg-secondary/40'}`}
+                      style={{ width: `${Math.max(pct, logged > 0 ? 6 : 0)}%` }}
+                    />
+                  </div>
+                </div>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </div>
+  )
+}
 
 function getGreeting() {
   const h = new Date().getHours()
@@ -79,10 +190,18 @@ function Dashboard() {
   const blocks = useBlocksForDate(today)
   const writingToday = useWritingEntriesForDate(today)
   const resources = useResources()
-  const { username, goalMinutesPerDay, plans, activePlanId } = useProfileStore()
+  const { username, plans, activePlanId } = useProfileStore()
   const activePlan = plans.find((plan) => plan.id === activePlanId)
 
-  const goal = activePlan?.daily_goal_minutes ?? goalMinutesPerDay
+  const goal = activePlan?.daily_goal_minutes ?? 0
+
+  const activePlanTemplate: WeeklyPlanTemplate | null = useMemo(() => {
+    if (!activePlan) return null
+    try { return JSON.parse(activePlan.template_json) } catch { return null }
+  }, [activePlan?.template_json])
+  const todayDayName = new Date()
+    .toLocaleDateString('en-US', { weekday: 'long' })
+    .toLowerCase()
   const pct = Math.min(100, Math.round((minutes / goal) * 100))
   const remaining = Math.max(0, goal - minutes)
   const hasReviewedPlan =
@@ -181,6 +300,13 @@ function Dashboard() {
 
       {/* Bento grid */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+        {/* Today's Plan — full row */}
+        <TodaysPlanCard
+          activePlanTemplate={activePlanTemplate}
+          dayName={todayDayName}
+          blocks={blocks}
+        />
+
         {/* Today's Progress — spans 8 cols */}
         <div className="md:col-span-8 bg-white border border-outline-variant rounded-2xl p-6 shadow-card">
           <div className="flex items-start justify-between mb-5">
@@ -285,7 +411,7 @@ function Dashboard() {
             </div>
             <p className="text-sm text-white/50 mt-2">
               {streak === 0
-                ? 'Log 30+ min to start'
+                ? 'Reach your plan goal to start'
                 : streak === 1
                   ? 'Keep going!'
                   : 'Consistent! 🎯'}
@@ -295,7 +421,9 @@ function Dashboard() {
             <p className="text-[11px] text-white/30 uppercase tracking-widest font-semibold">
               Valid day
             </p>
-            <p className="text-xs text-white/50 mt-0.5">≥ 30 min accumulated</p>
+            <p className="text-xs text-white/50 mt-0.5">
+              ≥ {goal > 0 ? `${goal} min` : 'plan goal'} accumulated
+            </p>
           </div>
         </div>
 

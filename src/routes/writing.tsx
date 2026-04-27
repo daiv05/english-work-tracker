@@ -3,6 +3,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { db } from '#/db/index'
 import { useWritingEntriesForDate } from '#/db/hooks'
 import { useToast } from '#/components/ui/ToastProvider'
+import { Select } from '#/components/ui/Select'
 import { todayStr } from '#/lib/streak'
 import { useProfileStore } from '#/store/profile'
 
@@ -282,17 +283,12 @@ function WritingMode() {
         {/* Toolbar */}
         <div className="flex items-center gap-3 px-4 py-3 border-b border-surface-low flex-wrap">
           {/* Prompt selector */}
-          <select
+          <Select
+            options={PROMPTS.map((p, i) => ({ value: i, label: p.label }))}
             value={promptIndex}
-            onChange={(e) => setPromptIndex(Number(e.target.value))}
-            className="flex-1 min-w-40 border border-surface-high rounded-lg px-3 py-1.5 text-sm text-on-surface bg-surface focus:outline-none focus:ring-2 focus:ring-tertiary cursor-pointer"
-          >
-            {PROMPTS.map((p, i) => (
-              <option key={i} value={i}>
-                {p.label}
-              </option>
-            ))}
-          </select>
+            onChange={(val) => setPromptIndex(Number(val))}
+            className="flex-1 min-w-40"
+          />
 
           {/* Metrics */}
           <div className="flex items-center gap-4 text-sm ml-auto">

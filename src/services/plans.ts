@@ -1,6 +1,8 @@
 import { db } from '#/db/index'
 import type { StudyPlan } from '#/db/index'
 import type { WeeklyPlanTemplate } from './types'
+import { seedDefaultResources } from './resources'
+
 
 const DEFAULT_PLAN_TEMPLATE: WeeklyPlanTemplate = {
   monday: [
@@ -119,6 +121,7 @@ export const plansService = {
     if (allPlans.length === 0) {
       const initial = buildDefaultPlan()
       const id = await db.plans.add(initial)
+      await seedDefaultResources(Number(id))
       return { id: Number(id), ...initial }
     }
 
@@ -129,6 +132,7 @@ export const plansService = {
     if (!first.id) {
       const initial = buildDefaultPlan()
       const id = await db.plans.add(initial)
+      await seedDefaultResources(Number(id))
       return { id: Number(id), ...initial }
     }
     await db.plans.update(first.id, { is_active: true, updated_at: Date.now() })
@@ -178,6 +182,7 @@ export const plansService = {
       created_at: now,
       updated_at: now,
     })
+    await seedDefaultResources(Number(id))
     return Number(id)
   },
 

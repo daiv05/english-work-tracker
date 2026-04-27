@@ -34,11 +34,13 @@ export function useTodayStats() {
 
 export function useStreak() {
   const activePlanId = useProfileStore((s) => s.activePlanId)
+  const plans = useProfileStore((s) => s.plans)
+  const goalMinutes = plans.find((p) => p.id === activePlanId)?.daily_goal_minutes ?? 60
   return (
     useLiveQuery(() => {
       if (!activePlanId) return 0
-      return calculateStreak(activePlanId)
-    }, [activePlanId]) ?? 0
+      return calculateStreak(activePlanId, goalMinutes)
+    }, [activePlanId, goalMinutes]) ?? 0
   )
 }
 

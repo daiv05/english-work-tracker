@@ -3,6 +3,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { ActivityTypeChip, typeConfig } from '#/components/ui/ActivityTypeChip'
 import { Modal } from '#/components/ui/Modal'
 import { useToast } from '#/components/ui/ToastProvider'
+import { SearchSelect } from '#/components/ui/SearchSelect'
 import { db } from '#/db/index'
 import type { ActivityType, DailyBlock } from '#/db/index'
 import {
@@ -207,26 +208,17 @@ function BlockForm({
       {resources.length > 0 && (
         <div>
           <label className={S.label}>Resource</label>
-          <select
-            value={form.resource_id}
-            onChange={(e) => set('resource_id', e.target.value)}
-            className={S.input}
-          >
-            <option value="">— Select —</option>
-            {categories.map((cat) => {
-              const cr = resources.filter((r) => r.category_id === cat.id)
-              if (!cr.length) return null
-              return (
-                <optgroup key={cat.id} label={cat.name}>
-                  {cr.map((r) => (
-                    <option key={r.id} value={r.id}>
-                      {r.title}
-                    </option>
-                  ))}
-                </optgroup>
-              )
-            })}
-          </select>
+          <SearchSelect
+            options={categories.flatMap((cat) =>
+              resources
+                .filter((r) => r.category_id === cat.id)
+                .map((r) => ({ value: r.id!, label: r.title, group: cat.name }))
+            )}
+            value={form.resource_id !== '' ? Number(form.resource_id) : undefined}
+            onChange={(val) => set('resource_id', String(val))}
+            placeholder="— Select resource —"
+            searchPlaceholder="Search resources…"
+          />
         </div>
       )}
 
@@ -458,26 +450,17 @@ function EditBlockModal({
         {resources.length > 0 && (
           <div>
             <label className={S.label}>Resource</label>
-            <select
-              value={form.resource_id}
-              onChange={(e) => set('resource_id', e.target.value)}
-              className={S.input}
-            >
-              <option value="">— Select —</option>
-              {categories.map((cat) => {
-                const cr = resources.filter((r) => r.category_id === cat.id)
-                if (!cr.length) return null
-                return (
-                  <optgroup key={cat.id} label={cat.name}>
-                    {cr.map((r) => (
-                      <option key={r.id} value={r.id}>
-                        {r.title}
-                      </option>
-                    ))}
-                  </optgroup>
-                )
-              })}
-            </select>
+            <SearchSelect
+              options={categories.flatMap((cat) =>
+                resources
+                  .filter((r) => r.category_id === cat.id)
+                  .map((r) => ({ value: r.id!, label: r.title, group: cat.name }))
+              )}
+              value={form.resource_id !== '' ? Number(form.resource_id) : undefined}
+              onChange={(val) => set('resource_id', String(val))}
+              placeholder="— Select resource —"
+              searchPlaceholder="Search resources…"
+            />
           </div>
         )}
         <div>

@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { Modal } from '#/components/ui/Modal'
 import { useToast } from '#/components/ui/ToastProvider'
+import { SearchSelect } from '#/components/ui/SearchSelect'
 import { db } from '#/db/index'
 import type { Resource, ResourceCategory } from '#/db/index'
 import { useResourceCategories, useResources } from '#/db/hooks'
@@ -393,19 +394,13 @@ function AddResourceForm({
             </button>
           </div>
         ) : (
-          <select
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-            required
-            className={inp}
-          >
-            <option value="">— Select —</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+          <SearchSelect
+            options={categories.map((c) => ({ value: c.id!, label: c.name }))}
+            value={categoryId !== '' ? Number(categoryId) : undefined}
+            onChange={(val) => setCategoryId(String(val))}
+            placeholder="— Select category —"
+            searchPlaceholder="Search categories…"
+          />
         )}
       </div>
       <div>

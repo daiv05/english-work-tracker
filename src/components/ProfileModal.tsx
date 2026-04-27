@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { Modal } from './ui/Modal'
 import { useToast } from './ui/ToastProvider'
+import { SearchSelect } from './ui/SearchSelect'
 import { useProfileStore } from '#/store/profile'
 
 interface ProfileModalProps {
@@ -13,36 +14,23 @@ export function ProfileModal({ open, onClose }: ProfileModalProps) {
   const {
     username,
     avatarData,
-    goalMinutesPerDay,
     plans,
     activePlanId,
     setUsername,
     setAvatarData,
-    setGoal,
-    updateActivePlanGoal,
     setActivePlan,
-    createPlan,
-    deletePlan,
   } = useProfileStore()
   const [nameInput, setNameInput] = useState(username)
-  const [goalInput, setGoalInput] = useState(String(goalMinutesPerDay))
-  const [newPlanName, setNewPlanName] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!open) return
     setNameInput(username)
-    setGoalInput(String(goalMinutesPerDay))
-  }, [open, username, goalMinutesPerDay])
+  }, [open, username])
 
   function handleSave() {
     const trimmed = nameInput.trim()
     if (trimmed) setUsername(trimmed)
-    const goal = parseInt(goalInput)
-    if (goal > 0) {
-      setGoal(goal)
-      void updateActivePlanGoal(goal)
-    }
     toast.success('Profile updated.')
     onClose()
   }
@@ -140,100 +128,25 @@ export function ProfileModal({ open, onClose }: ProfileModalProps) {
           />
         </div>
 
-        {/* Daily goal */}
-        <div>
-          <label className="block text-xs font-semibold text-on-surface-variant mb-1">
-            Daily goal (minutes)
-          </label>
-          <input
-            type="number"
-            min="15"
-            max="480"
-            value={goalInput}
-            onChange={(e) => setGoalInput(e.target.value)}
-            className={inputClass}
-          />
-          <p className="text-xs text-outline mt-1">
-            This value is synced with your active plan goal. Minimum 30 min
-            counts as a valid day for streak.
-          </p>
-        </div>
-
         <div>
           <label className="block text-xs font-semibold text-on-surface-variant mb-1">
             Active study plan
           </label>
-          <select
-            value={activePlanId ?? ''}
-            onChange={(e) => {
-              const id = Number(e.target.value)
+          <SearchSelect
+            options={plans.map((p) => ({ value: p.id!, label: p.name }))}
+            value={activePlanId}
+            onChange={(val) => {
+              const id = Number(val)
               if (id) {
                 void setActivePlan(id)
                   .then(() => toast.success('Active plan changed.'))
                   .catch(() => toast.error('Could not switch active plan.'))
               }
             }}
-            className={inputClass}
-          >
-            <option value="" disabled>
-              Select plan
-            </option>
-            {plans.map((plan) => (
-              <option key={plan.id} value={plan.id}>
-                {plan.name}
-              </option>
-            ))}
-          </select>
+            placeholder="Select plan"
+            searchPlaceholder="Search plans…"
+          />
         </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-on-surface-variant mb-1">
-            Create new plan
-          </label>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={newPlanName}
-              onChange={(e) => setNewPlanName(e.target.value)}
-              placeholder="Plan name"
-              className={inputClass}
-            />
-            <button
-              onClick={async () => {
-                if (!newPlanName.trim()) return
-                try {
-                  await createPlan(newPlanName)
-                  setNewPlanName('')
-                  toast.success('Plan created.')
-                } catch {
-                  toast.error('Could not create plan.')
-                }
-              }}
-              className="cursor-pointer px-3 rounded-lg bg-primary-dark text-white text-sm font-semibold hover:bg-primary-dark-hover transition-colors"
-            >
-              Add
-            </button>
-          </div>
-        </div>
-
-        {plans.length > 1 && activePlanId && (
-          <div>
-            <button
-              onClick={async () => {
-                if (!confirm('Delete active plan and all its data?')) return
-                try {
-                  await deletePlan(activePlanId)
-                  toast.success('Plan deleted.')
-                } catch {
-                  toast.error('Could not delete plan.')
-                }
-              }}
-              className="cursor-pointer text-xs text-red-500 hover:text-red-700 font-medium"
-            >
-              Delete active plan
-            </button>
-          </div>
-        )}
 
         {/* Actions */}
         <div className="flex gap-3 pt-1">

@@ -14,9 +14,10 @@ npm run preview    # Preview the production build
 npm run test       # Run tests with Vitest (one-shot, not watch)
 npm run lint       # ESLint + auto-fix (.ts, .tsx)
 npm run format     # Prettier check + write (src/)
+npm run types      # Run type-check only (no build)
 ```
 
-Run `npm run lint && npm run test` before considering a task complete.
+Run `npm run lint && npm run types && npm run test` before considering a task complete.
 
 ---
 

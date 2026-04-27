@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useRouterState } from '@tanstack/react-router'
 import { useProfileStore } from '#/store/profile'
 import { ProfileModal } from './ProfileModal'
+import { Select } from './ui/Select'
 
 const navLinks = [
   {
@@ -86,7 +87,7 @@ const navLinks = [
   },
   {
     to: '/plan',
-    label: 'Plan Builder',
+    label: 'Plan Editor',
     icon: (
       <svg
         width="18"
@@ -108,6 +109,8 @@ const navLinks = [
 
 function Avatar({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
   const { username, avatarData } = useProfileStore()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
   const sizeMap = {
     sm: 'w-7 h-7 text-xs',
     md: 'w-9 h-9 text-sm',
@@ -115,7 +118,7 @@ function Avatar({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
   }
   const initial = (username.charAt(0) || '?').toUpperCase()
 
-  if (avatarData) {
+  if (mounted && avatarData) {
     return (
       <img
         src={avatarData}
@@ -137,7 +140,7 @@ export { Avatar }
 
 export function Sidebar() {
   const { location } = useRouterState()
-  const { username, goalMinutesPerDay, plans, activePlanId, setActivePlan } =
+  const { username, plans, activePlanId, setActivePlan } =
     useProfileStore()
   const [showProfile, setShowProfile] = useState(false)
   const activePlan = plans.find((plan) => plan.id === activePlanId)
@@ -147,7 +150,7 @@ export function Sidebar() {
       <aside className="hidden md:flex flex-col w-64 min-h-screen bg-primary-dark text-white fixed left-0 top-0 z-30 border-r border-white/5">
         {/* App Brand */}
         <div className="px-5 pt-6 pb-4">
-          <div className="flex items-center gap-2.5 mb-1">
+          <Link to="/" className="flex items-center gap-2.5 mb-1 hover:opacity-80 transition-opacity">
             <img
               src="/manifest-icon-192.maskable.png"
               alt="EW"
@@ -172,7 +175,7 @@ export function Sidebar() {
               </p>
               <p className="text-[11px] text-white/40 leading-tight">Tracker</p>
             </div>
-          </div>
+          </Link>
         </div>
 
         {/* Profile section */}
@@ -181,14 +184,12 @@ export function Sidebar() {
             onClick={() => setShowProfile(true)}
             className="cursor-pointer w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 transition-colors text-left group"
           >
-            <Avatar size="md" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-white truncate">
                 {username}
               </p>
               <p className="text-[11px] text-white/40">
-                Goal: {activePlan?.daily_goal_minutes ?? goalMinutesPerDay}{' '}
-                min/day
+                {activePlan ? `${activePlan.level_from} → ${activePlan.level_to}` : 'No active plan'}
               </p>
             </div>
             <svg
@@ -217,29 +218,13 @@ export function Sidebar() {
             <label className="block text-[10px] uppercase tracking-widest text-white/35 mb-1.5 px-1">
               Active plan
             </label>
-            <select
-              value={activePlanId ?? ''}
-              onChange={(e) => {
-                const id = Number(e.target.value)
-                if (id) {
-                  void setActivePlan(id)
-                }
-              }}
-              className="w-full rounded-lg bg-white/5 border border-white/10 text-xs text-white px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-secondary-light/50"
-            >
-              <option value="" disabled>
-                Select plan
-              </option>
-              {plans.map((plan) => (
-                <option
-                  key={plan.id}
-                  value={plan.id}
-                  className="text-on-surface"
-                >
-                  {plan.name}
-                </option>
-              ))}
-            </select>
+            <Select
+              variant="dark"
+              options={plans.map((p) => ({ value: p.id!, label: p.name }))}
+              value={activePlanId}
+              onChange={(val) => { void setActivePlan(Number(val)) }}
+              placeholder="Select plan"
+            />
             <p className="text-[10px] text-white/35 mt-1 px-1 truncate">
               {activePlan?.level_from} to {activePlan?.level_to}
             </p>

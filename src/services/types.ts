@@ -24,5 +24,4 @@ export type WeeklyPlanTemplate = Record<string, PlanTemplateBlock[]>
 export interface UserProfile {
   username: string
   avatarData?: string // base64 data URL
-  goalMinutesPerDay: number
 }

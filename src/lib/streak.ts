@@ -34,7 +34,7 @@ export async function getDailyTotals(
 
 export async function calculateStreak(
   planId: number,
-  minimumMinutes = 30,
+  minimumMinutes: number,
 ): Promise<number> {
   let streak = 0
   const cursor = todayStr()

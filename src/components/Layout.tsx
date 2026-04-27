@@ -8,7 +8,7 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   return (
-    <div className="min-h-screen bg-[#f7f9fb]">
+    <div className="min-h-screen bg-surface">
       <Sidebar />
       {/* Main content: offset by sidebar width on desktop, offset top on mobile */}
       <main className="md:ml-64 pt-14 md:pt-0 pb-20 md:pb-0 min-h-screen">

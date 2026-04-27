@@ -1,4 +1,5 @@
-import Dexie, { type Table } from 'dexie'
+import Dexie from 'dexie'
+import type { Table } from 'dexie'
 
 export type ActivityType =
   | 'Listening'
@@ -76,40 +77,92 @@ export interface StudyPlan {
 
 const DEFAULT_PLAN_TEMPLATE = {
   monday: [
-    { block: 'Listening', minutes: 40, label: 'Series or YouTube with English subtitles' },
-    { block: 'Shadowing', minutes: 20, label: 'Repeat and imitate a short scene' },
+    {
+      block: 'Listening',
+      minutes: 40,
+      label: 'Series or YouTube with English subtitles',
+    },
+    {
+      block: 'Shadowing',
+      minutes: 20,
+      label: 'Repeat and imitate a short scene',
+    },
     { block: 'Vocabulary', minutes: 15, label: 'Anki with work-ready phrases' },
-    { block: 'Speaking', minutes: 20, label: 'Describe work done today and tomorrow plan' },
+    {
+      block: 'Speaking',
+      minutes: 20,
+      label: 'Describe work done today and tomorrow plan',
+    },
   ],
   tuesday: [
-    { block: 'Reading', minutes: 30, label: 'Technical docs, blog posts, or articles' },
-    { block: 'Listening', minutes: 20, label: 'Professional talk, tutorial, or conference clip' },
+    {
+      block: 'Reading',
+      minutes: 30,
+      label: 'Technical docs, blog posts, or articles',
+    },
+    {
+      block: 'Listening',
+      minutes: 20,
+      label: 'Professional talk, tutorial, or conference clip',
+    },
     { block: 'Shadowing', minutes: 20, label: 'Repeat selected segments' },
     { block: 'Vocabulary', minutes: 15, label: 'Anki review' },
   ],
   wednesday: [
     { block: 'Listening', minutes: 25, label: 'Short audiovisual content' },
-    { block: 'Speaking', minutes: 30, label: 'Project explanations and meeting simulations' },
-    { block: 'Shadowing', minutes: 15, label: 'Pronunciation and rhythm practice' },
+    {
+      block: 'Speaking',
+      minutes: 30,
+      label: 'Project explanations and meeting simulations',
+    },
+    {
+      block: 'Shadowing',
+      minutes: 15,
+      label: 'Pronunciation and rhythm practice',
+    },
     { block: 'Vocabulary', minutes: 15, label: 'Anki review' },
   ],
   thursday: [
-    { block: 'Listening', minutes: 45, label: 'Podcast or interview deep listening' },
-    { block: 'Shadowing', minutes: 20, label: 'Repeat after subtitle-assisted replay' },
+    {
+      block: 'Listening',
+      minutes: 45,
+      label: 'Podcast or interview deep listening',
+    },
+    {
+      block: 'Shadowing',
+      minutes: 20,
+      label: 'Repeat after subtitle-assisted replay',
+    },
     { block: 'Vocabulary', minutes: 15, label: 'Anki review' },
   ],
   friday: [
     { block: 'Listening', minutes: 25, label: 'Short content intake' },
-    { block: 'Writing', minutes: 30, label: 'Emails, reports, or technical explanations' },
-    { block: 'Shadowing', minutes: 15, label: 'Sentence-level pronunciation practice' },
+    {
+      block: 'Writing',
+      minutes: 30,
+      label: 'Emails, reports, or technical explanations',
+    },
+    {
+      block: 'Shadowing',
+      minutes: 15,
+      label: 'Sentence-level pronunciation practice',
+    },
     { block: 'Vocabulary', minutes: 15, label: 'Anki review' },
   ],
   saturday: [
-    { block: 'Listening', minutes: 90, label: 'Massive input from enjoyable long-form content' },
+    {
+      block: 'Listening',
+      minutes: 90,
+      label: 'Massive input from enjoyable long-form content',
+    },
   ],
   sunday: [
     { block: 'Vocabulary', minutes: 20, label: 'Anki consolidation session' },
-    { block: 'Listening', minutes: 20, label: 'Relaxed content, music, or podcasts' },
+    {
+      block: 'Listening',
+      minutes: 20,
+      label: 'Relaxed content, music, or podcasts',
+    },
   ],
   express_day: [
     { block: 'Listening', minutes: 15, label: 'Quick video' },
@@ -139,10 +192,13 @@ class EnglishDB extends Dexie {
     this.version(2)
       .stores({
         plans: '++id, is_active, created_at, updated_at',
-        daily_blocks: '++id, [plan_id+date], plan_id, date, type, resource_id, created_at',
-        writing_entries: '++id, [plan_id+date], plan_id, date, linked_block_id, created_at',
+        daily_blocks:
+          '++id, [plan_id+date], plan_id, date, type, resource_id, created_at',
+        writing_entries:
+          '++id, [plan_id+date], plan_id, date, linked_block_id, created_at',
         resource_categories: '++id, [plan_id+name], plan_id, name',
-        resources: '++id, [plan_id+category_id], plan_id, category_id, title, created_at',
+        resources:
+          '++id, [plan_id+category_id], plan_id, category_id, title, created_at',
         monthly_reviews: '++id, [plan_id+month], plan_id, month',
       })
       .upgrade(async (tx) => {

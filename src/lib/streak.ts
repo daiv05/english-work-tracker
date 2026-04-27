@@ -37,7 +37,7 @@ export async function calculateStreak(
   minimumMinutes = 30,
 ): Promise<number> {
   let streak = 0
-  let cursor = todayStr()
+  const cursor = todayStr()
   // Check up to 365 days back
   for (let i = 0; i < 365; i++) {
     const dateToCheck = i === 0 ? cursor : subtractDays(todayStr(), i)

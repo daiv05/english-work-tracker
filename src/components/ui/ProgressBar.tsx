@@ -6,9 +6,11 @@ interface ProgressBarProps {
 export function ProgressBar({ value, className = '' }: ProgressBarProps) {
   const clamped = Math.min(100, Math.max(0, value))
   return (
-    <div className={`w-full bg-[#e0e3e5] rounded-full h-2 overflow-hidden ${className}`}>
+    <div
+      className={`w-full bg-track rounded-full h-2 overflow-hidden ${className}`}
+    >
       <div
-        className="h-full bg-[#006c49] rounded-full transition-all duration-500"
+        className="h-full bg-secondary rounded-full transition-all duration-500"
         style={{ width: `${clamped}%` }}
       />
     </div>

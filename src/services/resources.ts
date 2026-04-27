@@ -1,7 +1,8 @@
 // Service layer for resources and resource_categories.
 // To migrate to API: replace each function body with a fetch() call to your backend.
 
-import { db, type Resource, type ResourceCategory } from '#/db/index'
+import { db } from '#/db/index'
+import type { Resource, ResourceCategory } from '#/db/index'
 
 export const categoriesService = {
   getAll(planId: number): Promise<ResourceCategory[]> {
@@ -9,7 +10,11 @@ export const categoriesService = {
   },
 
   create(planId: number, name: string): Promise<number> {
-    return db.resource_categories.add({ plan_id: planId, name, created_at: Date.now() }) as Promise<number>
+    return db.resource_categories.add({
+      plan_id: planId,
+      name,
+      created_at: Date.now(),
+    }) as Promise<number>
   },
 
   delete(id: number): Promise<void> {
@@ -23,7 +28,10 @@ export const resourcesService = {
   },
 
   getForCategory(planId: number, categoryId: number): Promise<Resource[]> {
-    return db.resources.where('[plan_id+category_id]').equals([planId, categoryId]).toArray()
+    return db.resources
+      .where('[plan_id+category_id]')
+      .equals([planId, categoryId])
+      .toArray()
   },
 
   create(resource: Omit<Resource, 'id'>): Promise<number> {
@@ -39,6 +47,9 @@ export const resourcesService = {
   },
 
   deleteForCategory(planId: number, categoryId: number): Promise<number> {
-    return db.resources.where('[plan_id+category_id]').equals([planId, categoryId]).delete()
+    return db.resources
+      .where('[plan_id+category_id]')
+      .equals([planId, categoryId])
+      .delete()
   },
 }

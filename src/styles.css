@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
-@import "tailwindcss";
+@import 'tailwindcss';
 
 * {
   box-sizing: border-box;
@@ -14,20 +14,20 @@ body,
 body {
   margin: 0;
   font-family: 'Inter', sans-serif;
-  background-color: #f7f9fb;
-  color: #191c1e;
+  background-color: var(--color-surface);
+  color: var(--color-on-surface);
 }
 
 /* All interactive elements get pointer cursor automatically */
 button,
-[role="button"],
+[role='button'],
 label[for],
 select,
 a {
   cursor: pointer;
 }
 
-input[type="file"] {
+input[type='file'] {
   cursor: pointer;
 }
 
@@ -48,21 +48,57 @@ button:disabled {
   --color-outline-variant: #c6c6cd;
   --color-primary: #000000;
   --color-on-primary: #ffffff;
-  --color-primary-container: #131b2e;
+  --color-primary-dark: #0f172a;
+  --color-primary-dark-hover: #1e293b;
   --color-secondary: #006c49;
+  --color-secondary-hover: #005236;
+  --color-secondary-light: #4edea3;
   --color-secondary-container: #6cf8bb;
   --color-on-secondary-container: #00714d;
   --color-tertiary-accent: #3980f4;
   --color-error: #ba1a1a;
+  --color-track: #e0e3e5;
   --shadow-card: 0px 4px 20px rgba(15, 23, 42, 0.05);
+  --shadow-card-sm: 0px 2px 8px rgba(15, 23, 42, 0.04);
+  --shadow-card-hover: 0px 4px 16px rgba(15, 23, 42, 0.08);
+  --shadow-card-dark: 0px 4px 20px rgba(15, 23, 42, 0.1);
 }
 
 /* Card baseline */
 .card {
   background: white;
-  border: 1px solid #c6c6cd;
+  border: 1px solid var(--color-outline-variant);
   border-radius: 0.75rem;
   box-shadow: var(--shadow-card);
+}
+
+/* Tailwind theme — maps CSS variables to utility classes */
+@theme inline {
+  --color-surface: var(--color-surface);
+  --color-surface-lowest: var(--color-surface-container-lowest);
+  --color-surface-low: var(--color-surface-container-low);
+  --color-surface-mid: var(--color-surface-container);
+  --color-surface-high: var(--color-surface-container-high);
+  --color-on-surface: var(--color-on-surface);
+  --color-on-surface-variant: var(--color-on-surface-variant);
+  --color-outline: var(--color-outline);
+  --color-outline-variant: var(--color-outline-variant);
+  --color-primary: var(--color-primary);
+  --color-on-primary: var(--color-on-primary);
+  --color-primary-dark: var(--color-primary-dark);
+  --color-primary-dark-hover: var(--color-primary-dark-hover);
+  --color-secondary: var(--color-secondary);
+  --color-secondary-hover: var(--color-secondary-hover);
+  --color-secondary-light: var(--color-secondary-light);
+  --color-secondary-container: var(--color-secondary-container);
+  --color-on-secondary-container: var(--color-on-secondary-container);
+  --color-tertiary: var(--color-tertiary-accent);
+  --color-error: var(--color-error);
+  --color-track: var(--color-track);
+  --shadow-card: var(--shadow-card);
+  --shadow-card-sm: var(--shadow-card-sm);
+  --shadow-card-hover: var(--shadow-card-hover);
+  --shadow-card-dark: var(--shadow-card-dark);
 }
 
 /* Scrollbar styling */

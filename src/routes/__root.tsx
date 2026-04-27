@@ -1,6 +1,7 @@
-import { HeadContent, Outlet, Scripts, createRootRoute } from '@tanstack/react-router'
+import { HeadContent, Link, Outlet, Scripts, createRootRoute } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { Layout } from '#/components/Layout'
+import { ToastProvider } from '#/components/ui/ToastProvider'
 import { useProfileStore } from '#/store/profile'
 
 import appCss from '../styles.css?url'
@@ -20,6 +21,7 @@ export const Route = createRootRoute({
   }),
   shellComponent: RootDocument,
   component: RootLayout,
+  notFoundComponent: RootNotFound,
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
@@ -42,8 +44,32 @@ function RootLayout() {
   }, [])
 
   return (
-    <Layout>
-      <Outlet />
-    </Layout>
+    <ToastProvider>
+      <Layout>
+        <Outlet />
+      </Layout>
+    </ToastProvider>
+  )
+}
+
+function RootNotFound() {
+  return (
+    <div className="px-4 md:px-8 py-10">
+      <div className="max-w-xl bg-white border border-outline-variant rounded-2xl p-6 shadow-card">
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-outline mb-2">
+          Error 404
+        </p>
+        <h1 className="text-2xl font-bold text-on-surface mb-2">Page not found</h1>
+        <p className="text-sm text-on-surface-variant mb-4">
+          The page you are looking for does not exist or was moved.
+        </p>
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 rounded-lg bg-primary-dark text-white px-4 py-2 text-sm font-semibold hover:bg-primary-dark-hover transition-colors"
+        >
+          Go to Dashboard
+        </Link>
+      </div>
+    </div>
   )
 }

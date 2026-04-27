@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { Modal } from './ui/Modal'
+import { useToast } from './ui/ToastProvider'
 import { useProfileStore } from '#/store/profile'
 
 interface ProfileModalProps {
@@ -8,6 +9,7 @@ interface ProfileModalProps {
 }
 
 export function ProfileModal({ open, onClose }: ProfileModalProps) {
+  const toast = useToast()
   const {
     username,
     avatarData,
@@ -41,6 +43,7 @@ export function ProfileModal({ open, onClose }: ProfileModalProps) {
       setGoal(goal)
       void updateActivePlanGoal(goal)
     }
+    toast.success('Profile updated.')
     onClose()
   }
 
@@ -60,7 +63,7 @@ export function ProfileModal({ open, onClose }: ProfileModalProps) {
   }
 
   const inputClass =
-    'w-full border border-[#c6c6cd] rounded-lg px-3 py-2 text-sm text-[#191c1e] bg-white focus:outline-none focus:ring-2 focus:ring-[#3980f4] focus:border-transparent placeholder:text-[#76777d]'
+    'w-full border border-outline-variant rounded-lg px-3 py-2 text-sm text-on-surface bg-white focus:outline-none focus:ring-2 focus:ring-tertiary focus:border-transparent placeholder:text-outline'
 
   return (
     <Modal open={open} onClose={onClose} title="Edit Profile">
@@ -72,21 +75,36 @@ export function ProfileModal({ open, onClose }: ProfileModalProps) {
               <img
                 src={avatarData}
                 alt="Profile"
-                className="w-20 h-20 rounded-full object-cover border-2 border-[#c6c6cd]"
+                className="w-20 h-20 rounded-full object-cover border-2 border-outline-variant"
               />
             ) : (
-              <div className="w-20 h-20 rounded-full bg-[#131b2e] flex items-center justify-center text-2xl font-bold text-white select-none">
-                {(nameInput.trim()[0] ?? '?').toUpperCase()}
+              <div className="w-20 h-20 rounded-full bg-primary-dark flex items-center justify-center text-2xl font-bold text-white select-none">
+                {(nameInput.trim().charAt(0) || '?').toUpperCase()}
               </div>
             )}
             <button
               onClick={() => fileRef.current?.click()}
-              className="cursor-pointer absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-[#006c49] text-white flex items-center justify-center shadow-md hover:bg-[#005236] transition-colors"
+              className="cursor-pointer absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-secondary text-white flex items-center justify-center shadow-md hover:bg-secondary-hover transition-colors"
               title="Change photo"
             >
-              <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+              <svg
+                width="12"
+                height="12"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                />
               </svg>
             </button>
           </div>
@@ -109,7 +127,9 @@ export function ProfileModal({ open, onClose }: ProfileModalProps) {
 
         {/* Username */}
         <div>
-          <label className="block text-xs font-semibold text-[#45464d] mb-1">Display name</label>
+          <label className="block text-xs font-semibold text-on-surface-variant mb-1">
+            Display name
+          </label>
           <input
             type="text"
             value={nameInput}
@@ -122,7 +142,7 @@ export function ProfileModal({ open, onClose }: ProfileModalProps) {
 
         {/* Daily goal */}
         <div>
-          <label className="block text-xs font-semibold text-[#45464d] mb-1">
+          <label className="block text-xs font-semibold text-on-surface-variant mb-1">
             Daily goal (minutes)
           </label>
           <input
@@ -133,19 +153,24 @@ export function ProfileModal({ open, onClose }: ProfileModalProps) {
             onChange={(e) => setGoalInput(e.target.value)}
             className={inputClass}
           />
-          <p className="text-xs text-[#76777d] mt-1">
-            Minimum 30 min counts as a valid day for your streak.
+          <p className="text-xs text-outline mt-1">
+            This value is synced with your active plan goal. Minimum 30 min
+            counts as a valid day for streak.
           </p>
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-[#45464d] mb-1">Active study plan</label>
+          <label className="block text-xs font-semibold text-on-surface-variant mb-1">
+            Active study plan
+          </label>
           <select
             value={activePlanId ?? ''}
             onChange={(e) => {
               const id = Number(e.target.value)
               if (id) {
                 void setActivePlan(id)
+                  .then(() => toast.success('Active plan changed.'))
+                  .catch(() => toast.error('Could not switch active plan.'))
               }
             }}
             className={inputClass}
@@ -162,7 +187,9 @@ export function ProfileModal({ open, onClose }: ProfileModalProps) {
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-[#45464d] mb-1">Create new plan</label>
+          <label className="block text-xs font-semibold text-on-surface-variant mb-1">
+            Create new plan
+          </label>
           <div className="flex gap-2">
             <input
               type="text"
@@ -174,10 +201,15 @@ export function ProfileModal({ open, onClose }: ProfileModalProps) {
             <button
               onClick={async () => {
                 if (!newPlanName.trim()) return
-                await createPlan(newPlanName)
-                setNewPlanName('')
+                try {
+                  await createPlan(newPlanName)
+                  setNewPlanName('')
+                  toast.success('Plan created.')
+                } catch {
+                  toast.error('Could not create plan.')
+                }
               }}
-              className="cursor-pointer px-3 rounded-lg bg-[#0f172a] text-white text-sm font-semibold hover:bg-[#1e293b] transition-colors"
+              className="cursor-pointer px-3 rounded-lg bg-primary-dark text-white text-sm font-semibold hover:bg-primary-dark-hover transition-colors"
             >
               Add
             </button>
@@ -189,7 +221,12 @@ export function ProfileModal({ open, onClose }: ProfileModalProps) {
             <button
               onClick={async () => {
                 if (!confirm('Delete active plan and all its data?')) return
-                await deletePlan(activePlanId)
+                try {
+                  await deletePlan(activePlanId)
+                  toast.success('Plan deleted.')
+                } catch {
+                  toast.error('Could not delete plan.')
+                }
               }}
               className="cursor-pointer text-xs text-red-500 hover:text-red-700 font-medium"
             >
@@ -202,13 +239,13 @@ export function ProfileModal({ open, onClose }: ProfileModalProps) {
         <div className="flex gap-3 pt-1">
           <button
             onClick={onClose}
-            className="cursor-pointer flex-1 py-2.5 rounded-lg border border-[#c6c6cd] text-sm font-semibold text-[#45464d] hover:bg-[#f2f4f6] transition-colors"
+            className="cursor-pointer flex-1 py-2.5 rounded-lg border border-outline-variant text-sm font-semibold text-on-surface-variant hover:bg-surface-low transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="cursor-pointer flex-1 py-2.5 rounded-lg bg-[#000000] text-white text-sm font-semibold hover:bg-[#131b2e] transition-colors"
+            className="cursor-pointer flex-1 py-2.5 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary-dark transition-colors"
           >
             Save
           </button>

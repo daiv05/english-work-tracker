@@ -23,15 +23,19 @@ export function TopHeader() {
   return (
     <>
       {/* Mobile-only top header */}
-      <header className="md:hidden fixed top-0 left-0 right-0 z-20 h-14 bg-white/95 backdrop-blur-sm border-b border-[#e6e8ea] flex items-center justify-between px-4">
+      <header className="md:hidden fixed top-0 left-0 right-0 z-20 h-14 bg-white/95 backdrop-blur-sm border-b border-surface-high flex items-center justify-between px-4">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-[#0f172a] flex items-center justify-center">
+          <div className="w-7 h-7 rounded-lg bg-primary-dark flex items-center justify-center">
             <span className="text-white text-[10px] font-bold">EW</span>
           </div>
           <div>
-            <h1 className="text-sm font-bold text-[#191c1e] leading-tight">{title}</h1>
+            <h1 className="text-sm font-bold text-on-surface leading-tight">
+              {title}
+            </h1>
             {activePlan && (
-              <p className="text-[10px] text-[#76777d] leading-tight">{activePlan.name}</p>
+              <p className="text-[10px] text-outline leading-tight">
+                {activePlan.name}
+              </p>
             )}
           </div>
         </div>
@@ -46,12 +50,12 @@ export function TopHeader() {
 
       {/* Desktop: just a top bar with page context (no fixed position, flows with content) */}
       <div className="hidden md:flex items-center justify-between px-8 pt-7 pb-0">
-        <div className="text-xs text-[#76777d]">
+        <div className="text-xs text-outline">
           {activePlan ? `Active plan: ${activePlan.name}` : ''}
         </div>
         <button
           onClick={() => setShowProfile(true)}
-          className="cursor-pointer flex items-center gap-2 text-sm text-[#45464d] hover:text-[#191c1e] transition-colors"
+          className="cursor-pointer flex items-center gap-2 text-sm text-on-surface-variant hover:text-on-surface transition-colors"
           aria-label="Edit profile"
         >
           <Avatar size="sm" />

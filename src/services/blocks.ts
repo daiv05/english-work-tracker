@@ -2,15 +2,22 @@
 // To migrate to API: replace each function body with a fetch() call to your backend.
 // The call signatures and return types must stay the same.
 
-import { db, type DailyBlock } from '#/db/index'
+import { db } from '#/db/index'
+import type { DailyBlock } from '#/db/index'
 
 export const blocksService = {
   getForDate(planId: number, date: string): Promise<DailyBlock[]> {
-    return db.daily_blocks.where('[plan_id+date]').equals([planId, date]).sortBy('created_at')
+    return db.daily_blocks
+      .where('[plan_id+date]')
+      .equals([planId, date])
+      .sortBy('created_at')
   },
 
   async getTotalMinutesForDate(planId: number, date: string): Promise<number> {
-    const blocks = await db.daily_blocks.where('[plan_id+date]').equals([planId, date]).toArray()
+    const blocks = await db.daily_blocks
+      .where('[plan_id+date]')
+      .equals([planId, date])
+      .toArray()
     return blocks.reduce((sum, b) => sum + b.duration_minutes, 0)
   },
 

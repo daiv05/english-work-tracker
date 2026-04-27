@@ -6,6 +6,7 @@ import type { StudyPlan, UserProfile } from '#/services/types'
 interface ProfileStore extends UserProfile {
   plans: StudyPlan[]
   activePlanId?: number
+  isInitialized: boolean
   setUsername: (username: string) => void
   setAvatarData: (avatarData: string | undefined) => void
   setGoal: (minutes: number) => void
@@ -21,6 +22,7 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
   ...profileService.get(),
   plans: [],
   activePlanId: undefined,
+  isInitialized: false,
 
   setUsername(username) {
     const updated = profileService.update({ username })
@@ -42,7 +44,8 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
     if (!activePlanId) return
     await plansService.update(activePlanId, { daily_goal_minutes: minutes })
     const plans = await plansService.list()
-    set({ plans })
+    const active = plans.find((plan) => plan.is_active) ?? plans[0]
+    set({ plans, activePlanId: active?.id })
   },
 
   async updateActivePlan(changes) {
@@ -50,14 +53,15 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
     if (!activePlanId) return
     await plansService.update(activePlanId, changes)
     const plans = await plansService.list()
-    const active = plans.find((plan) => plan.is_active)
+    const active = plans.find((plan) => plan.is_active) ?? plans[0]
     set({ plans, activePlanId: active?.id })
   },
 
   async setActivePlan(planId) {
     await plansService.setActive(planId)
     const plans = await plansService.list()
-    set({ plans, activePlanId: planId })
+    const active = plans.find((plan) => plan.is_active) ?? plans.find((plan) => plan.id === planId) ?? plans[0]
+    set({ plans, activePlanId: active?.id })
   },
 
   async createPlan(name) {
@@ -65,22 +69,26 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
     if (!trimmed) return
     await plansService.create({ name: trimmed })
     const plans = await plansService.list()
-    const active = plans.find((p) => p.is_active)
+    const active = plans.find((p) => p.is_active) ?? plans[0]
     set({ plans, activePlanId: active?.id })
   },
 
   async deletePlan(planId) {
     await plansService.delete(planId)
     const plans = await plansService.list()
-    const active = plans.find((p) => p.is_active)
+    const active = plans.find((p) => p.is_active) ?? plans[0]
     set({ plans, activePlanId: active?.id })
   },
 
   async _init() {
-    const profile = profileService.get()
-    await plansService.ensureDefaultPlan()
-    const plans = await plansService.list()
-    const active = plans.find((plan) => plan.is_active)
-    set({ ...profile, plans, activePlanId: active?.id })
+    try {
+      const profile = profileService.get()
+      await plansService.ensureDefaultPlan()
+      const plans = await plansService.list()
+      const active = plans.find((plan) => plan.is_active) ?? plans[0]
+      set({ ...profile, plans, activePlanId: active?.id, isInitialized: true })
+    } catch {
+      set({ isInitialized: true })
+    }
   },
 }))

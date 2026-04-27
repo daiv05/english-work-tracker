@@ -115,17 +115,17 @@ function buildDefaultPlan(): Omit<StudyPlan, 'id'> {
 
 export const plansService = {
   async ensureDefaultPlan(): Promise<StudyPlan> {
-    const count = await db.plans.count()
-    if (count === 0) {
+    const allPlans = await db.plans.orderBy('created_at').toArray()
+    if (allPlans.length === 0) {
       const initial = buildDefaultPlan()
       const id = await db.plans.add(initial)
       return { id: Number(id), ...initial }
     }
 
-    const active = await db.plans.where('is_active').equals(true).first()
+    const active = allPlans.find((p) => p.is_active)
     if (active) return active
 
-    const first = await db.plans.orderBy('created_at').first()
+    const first = allPlans[0]
     if (!first?.id) {
       const initial = buildDefaultPlan()
       const id = await db.plans.add(initial)
@@ -144,7 +144,8 @@ export const plansService = {
   },
 
   async getActive(): Promise<StudyPlan | undefined> {
-    return db.plans.where('is_active').equals(true).first()
+    const plans = await db.plans.toArray()
+    return plans.find((p) => p.is_active)
   },
 
   async setActive(planId: number): Promise<void> {

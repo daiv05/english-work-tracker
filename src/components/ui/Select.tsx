@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 export interface SelectOption {
   value: string | number
@@ -27,7 +28,14 @@ export function Select({
   const [open, setOpen] = useState(false)
   const [focusedIndex, setFocusedIndex] = useState(-1)
   const containerRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const dropdownRef = useRef<HTMLUListElement>(null)
   const listRef = useRef<HTMLUListElement>(null)
+  const [dropdownStyle, setDropdownStyle] = useState<{
+    top: number
+    left: number
+    width: number
+  } | null>(null)
 
   const selected = options.find((o) => o.value === value)
 
@@ -35,12 +43,40 @@ export function Select({
   useEffect(() => {
     if (!open) return
     function handle(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setOpen(false)
-      }
+      const target = e.target as Node
+      const clickedTrigger = !!containerRef.current?.contains(target)
+      const clickedDropdown = !!dropdownRef.current?.contains(target)
+      if (!clickedTrigger && !clickedDropdown) setOpen(false)
     }
     document.addEventListener('mousedown', handle)
     return () => document.removeEventListener('mousedown', handle)
+  }, [open])
+
+  // Position dropdown in a portal so it doesn't expand scrollable parents
+  useEffect(() => {
+    if (!open) {
+      setDropdownStyle(null)
+      return
+    }
+
+    function updatePosition() {
+      const rect = triggerRef.current?.getBoundingClientRect()
+      if (!rect) return
+      const gap = 4
+      setDropdownStyle({
+        top: rect.bottom + gap,
+        left: rect.left,
+        width: rect.width,
+      })
+    }
+
+    updatePosition()
+    window.addEventListener('resize', updatePosition)
+    window.addEventListener('scroll', updatePosition, true)
+    return () => {
+      window.removeEventListener('resize', updatePosition)
+      window.removeEventListener('scroll', updatePosition, true)
+    }
   }, [open])
 
   // Scroll focused item into view
@@ -96,6 +132,7 @@ export function Select({
     <div ref={containerRef} className="relative w-full">
       <button
         type="button"
+        ref={triggerRef}
         disabled={disabled}
         onClick={() => { if (!disabled) { setOpen((o) => !o); setFocusedIndex(options.findIndex((o) => o.value === value)) } }}
         onKeyDown={handleKeyDown}
@@ -117,32 +154,43 @@ export function Select({
         </svg>
       </button>
 
-      {open && (
-        <ul
-          ref={listRef}
-          role="listbox"
-          className={`absolute z-50 w-full mt-1 rounded-lg shadow-lg overflow-hidden max-h-52 overflow-y-auto ${dropdownBase}`}
-        >
-          {options.map((opt, i) => {
-            const isSelected = opt.value === value
-            const isFocused = i === focusedIndex
-            return (
-              <li
-                key={opt.value}
-                role="option"
-                aria-selected={isSelected}
-                onMouseEnter={() => setFocusedIndex(i)}
-                onClick={() => { onChange(opt.value); setOpen(false) }}
-                className={`px-3 py-2 text-sm cursor-pointer transition-colors ${
-                  isSelected ? optionActive : isFocused ? (isDark ? 'bg-white/8' : 'bg-surface-low') : optionBase
-                }`}
-              >
-                {opt.label}
-              </li>
-            )
-          })}
-        </ul>
-      )}
+      {open && typeof document !== 'undefined' && dropdownStyle &&
+        createPortal(
+          <ul
+            ref={(node) => {
+              dropdownRef.current = node
+              listRef.current = node
+            }}
+            role="listbox"
+            className={`z-[60] rounded-lg shadow-lg overflow-hidden max-h-52 overflow-y-auto ${dropdownBase}`}
+            style={{
+              position: 'fixed',
+              top: dropdownStyle.top,
+              left: dropdownStyle.left,
+              width: dropdownStyle.width,
+            }}
+          >
+            {options.map((opt, i) => {
+              const isSelected = opt.value === value
+              const isFocused = i === focusedIndex
+              return (
+                <li
+                  key={opt.value}
+                  role="option"
+                  aria-selected={isSelected}
+                  onMouseEnter={() => setFocusedIndex(i)}
+                  onClick={() => { onChange(opt.value); setOpen(false) }}
+                  className={`px-3 py-2 text-sm cursor-pointer transition-colors ${
+                    isSelected ? optionActive : isFocused ? (isDark ? 'bg-white/8' : 'bg-surface-low') : optionBase
+                  }`}
+                >
+                  {opt.label}
+                </li>
+              )
+            })}
+          </ul>,
+          document.body,
+        )}
     </div>
   )
 }

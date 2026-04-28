@@ -3,12 +3,12 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Modal } from '#/components/ui/Modal'
 import { useToast } from '#/components/ui/ToastProvider'
 import { SearchSelect } from '#/components/ui/SearchSelect'
-import { db } from '#/db/index'
+import { categoriesService, resourcesService } from '#/services/resources'
 import type { Resource, ResourceCategory } from '#/db/index'
 import { useResourceCategories, useResources } from '#/db/hooks'
 import { useProfileStore } from '#/store/profile'
 
-export const Route = createFileRoute('/resources')({
+export const Route = createFileRoute('/app/resources')({
   component: ResourceLibrary,
 })
 
@@ -303,11 +303,7 @@ function AddResourceForm({
     if (!planId) return
     if (!newCatName.trim()) return
     try {
-      const id = await db.resource_categories.add({
-        plan_id: planId,
-        name: newCatName.trim(),
-        created_at: Date.now(),
-      })
+      const id = await categoriesService.create(planId, newCatName.trim())
       setCategoryId(String(id))
       setNewCatName('')
       setCreatingCat(false)
@@ -322,7 +318,7 @@ function AddResourceForm({
     if (!planId) return
     if (!title.trim() || !categoryId) return
     try {
-      await db.resources.add({
+      await resourcesService.create({
         plan_id: planId,
         category_id: parseInt(categoryId),
         title: title.trim(),
@@ -466,7 +462,7 @@ function ResourceLibrary() {
   async function handleDeleteResource(id: number) {
     if (!confirm('Delete this resource?')) return
     try {
-      await db.resources.delete(id)
+      await resourcesService.delete(id)
       toast.success('Resource deleted.')
     } catch {
       toast.error('Could not delete resource.')
@@ -483,8 +479,7 @@ function ResourceLibrary() {
       )
     ) {
       try {
-        await db.resources.where('category_id').equals(id).delete()
-        await db.resource_categories.delete(id)
+        await categoriesService.delete(id)
         toast.success('Category deleted.')
       } catch {
         toast.error('Could not delete category.')
@@ -497,11 +492,7 @@ function ResourceLibrary() {
     if (!activePlanId) return
     if (!newCatName.trim()) return
     try {
-      await db.resource_categories.add({
-        plan_id: activePlanId,
-        name: newCatName.trim(),
-        created_at: Date.now(),
-      })
+      await categoriesService.create(activePlanId, newCatName.trim())
       setNewCatName('')
       setShowAddCategory(false)
       toast.success('Category created.')

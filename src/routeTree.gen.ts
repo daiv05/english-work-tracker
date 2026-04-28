@@ -9,36 +9,27 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WritingRouteImport } from './routes/writing'
-import { Route as ResourcesRouteImport } from './routes/resources'
 import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as PlanRouteImport } from './routes/plan'
-import { Route as LogRouteImport } from './routes/log'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppIndexRouteImport } from './routes/app/index'
+import { Route as AuthResetRouteImport } from './routes/auth/reset'
+import { Route as AuthRegisterRouteImport } from './routes/auth/register'
+import { Route as AuthLoginRouteImport } from './routes/auth/login'
+import { Route as AuthForgotRouteImport } from './routes/auth/forgot'
+import { Route as AppWritingRouteImport } from './routes/app/writing'
+import { Route as AppResourcesRouteImport } from './routes/app/resources'
+import { Route as AppPlanRouteImport } from './routes/app/plan'
+import { Route as AppLogRouteImport } from './routes/app/log'
 
-const WritingRoute = WritingRouteImport.update({
-  id: '/writing',
-  path: '/writing',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResourcesRoute = ResourcesRouteImport.update({
-  id: '/resources',
-  path: '/resources',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PlanRoute = PlanRouteImport.update({
-  id: '/plan',
-  path: '/plan',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LogRoute = LogRouteImport.update({
-  id: '/log',
-  path: '/log',
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -46,72 +37,150 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AuthResetRoute = AuthResetRouteImport.update({
+  id: '/auth/reset',
+  path: '/auth/reset',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRegisterRoute = AuthRegisterRouteImport.update({
+  id: '/auth/register',
+  path: '/auth/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/auth/login',
+  path: '/auth/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthForgotRoute = AuthForgotRouteImport.update({
+  id: '/auth/forgot',
+  path: '/auth/forgot',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppWritingRoute = AppWritingRouteImport.update({
+  id: '/writing',
+  path: '/writing',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppResourcesRoute = AppResourcesRouteImport.update({
+  id: '/resources',
+  path: '/resources',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPlanRoute = AppPlanRouteImport.update({
+  id: '/plan',
+  path: '/plan',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLogRoute = AppLogRouteImport.update({
+  id: '/log',
+  path: '/log',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/log': typeof LogRoute
-  '/plan': typeof PlanRoute
+  '/app': typeof AppRouteWithChildren
   '/privacy': typeof PrivacyRoute
-  '/resources': typeof ResourcesRoute
-  '/writing': typeof WritingRoute
+  '/app/log': typeof AppLogRoute
+  '/app/plan': typeof AppPlanRoute
+  '/app/resources': typeof AppResourcesRoute
+  '/app/writing': typeof AppWritingRoute
+  '/auth/forgot': typeof AuthForgotRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/register': typeof AuthRegisterRoute
+  '/auth/reset': typeof AuthResetRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/log': typeof LogRoute
-  '/plan': typeof PlanRoute
   '/privacy': typeof PrivacyRoute
-  '/resources': typeof ResourcesRoute
-  '/writing': typeof WritingRoute
+  '/app/log': typeof AppLogRoute
+  '/app/plan': typeof AppPlanRoute
+  '/app/resources': typeof AppResourcesRoute
+  '/app/writing': typeof AppWritingRoute
+  '/auth/forgot': typeof AuthForgotRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/register': typeof AuthRegisterRoute
+  '/auth/reset': typeof AuthResetRoute
+  '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/log': typeof LogRoute
-  '/plan': typeof PlanRoute
+  '/app': typeof AppRouteWithChildren
   '/privacy': typeof PrivacyRoute
-  '/resources': typeof ResourcesRoute
-  '/writing': typeof WritingRoute
+  '/app/log': typeof AppLogRoute
+  '/app/plan': typeof AppPlanRoute
+  '/app/resources': typeof AppResourcesRoute
+  '/app/writing': typeof AppWritingRoute
+  '/auth/forgot': typeof AuthForgotRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/register': typeof AuthRegisterRoute
+  '/auth/reset': typeof AuthResetRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/log' | '/plan' | '/privacy' | '/resources' | '/writing'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/privacy'
+    | '/app/log'
+    | '/app/plan'
+    | '/app/resources'
+    | '/app/writing'
+    | '/auth/forgot'
+    | '/auth/login'
+    | '/auth/register'
+    | '/auth/reset'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/log' | '/plan' | '/privacy' | '/resources' | '/writing'
+  to:
+    | '/'
+    | '/privacy'
+    | '/app/log'
+    | '/app/plan'
+    | '/app/resources'
+    | '/app/writing'
+    | '/auth/forgot'
+    | '/auth/login'
+    | '/auth/register'
+    | '/auth/reset'
+    | '/app'
   id:
     | '__root__'
     | '/'
-    | '/log'
-    | '/plan'
+    | '/app'
     | '/privacy'
-    | '/resources'
-    | '/writing'
+    | '/app/log'
+    | '/app/plan'
+    | '/app/resources'
+    | '/app/writing'
+    | '/auth/forgot'
+    | '/auth/login'
+    | '/auth/register'
+    | '/auth/reset'
+    | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  LogRoute: typeof LogRoute
-  PlanRoute: typeof PlanRoute
+  AppRoute: typeof AppRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
-  ResourcesRoute: typeof ResourcesRoute
-  WritingRoute: typeof WritingRoute
+  AuthForgotRoute: typeof AuthForgotRoute
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthRegisterRoute: typeof AuthRegisterRoute
+  AuthResetRoute: typeof AuthResetRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/writing': {
-      id: '/writing'
-      path: '/writing'
-      fullPath: '/writing'
-      preLoaderRoute: typeof WritingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/resources': {
-      id: '/resources'
-      path: '/resources'
-      fullPath: '/resources'
-      preLoaderRoute: typeof ResourcesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/privacy': {
       id: '/privacy'
       path: '/privacy'
@@ -119,18 +188,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/plan': {
-      id: '/plan'
-      path: '/plan'
-      fullPath: '/plan'
-      preLoaderRoute: typeof PlanRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/log': {
-      id: '/log'
-      path: '/log'
-      fullPath: '/log'
-      preLoaderRoute: typeof LogRouteImport
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -140,16 +202,98 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/auth/reset': {
+      id: '/auth/reset'
+      path: '/auth/reset'
+      fullPath: '/auth/reset'
+      preLoaderRoute: typeof AuthResetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/register': {
+      id: '/auth/register'
+      path: '/auth/register'
+      fullPath: '/auth/register'
+      preLoaderRoute: typeof AuthRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/auth/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/forgot': {
+      id: '/auth/forgot'
+      path: '/auth/forgot'
+      fullPath: '/auth/forgot'
+      preLoaderRoute: typeof AuthForgotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/writing': {
+      id: '/app/writing'
+      path: '/writing'
+      fullPath: '/app/writing'
+      preLoaderRoute: typeof AppWritingRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/resources': {
+      id: '/app/resources'
+      path: '/resources'
+      fullPath: '/app/resources'
+      preLoaderRoute: typeof AppResourcesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/plan': {
+      id: '/app/plan'
+      path: '/plan'
+      fullPath: '/app/plan'
+      preLoaderRoute: typeof AppPlanRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/log': {
+      id: '/app/log'
+      path: '/log'
+      fullPath: '/app/log'
+      preLoaderRoute: typeof AppLogRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppLogRoute: typeof AppLogRoute
+  AppPlanRoute: typeof AppPlanRoute
+  AppResourcesRoute: typeof AppResourcesRoute
+  AppWritingRoute: typeof AppWritingRoute
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppLogRoute: AppLogRoute,
+  AppPlanRoute: AppPlanRoute,
+  AppResourcesRoute: AppResourcesRoute,
+  AppWritingRoute: AppWritingRoute,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  LogRoute: LogRoute,
-  PlanRoute: PlanRoute,
+  AppRoute: AppRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
-  ResourcesRoute: ResourcesRoute,
-  WritingRoute: WritingRoute,
+  AuthForgotRoute: AuthForgotRoute,
+  AuthLoginRoute: AuthLoginRoute,
+  AuthRegisterRoute: AuthRegisterRoute,
+  AuthResetRoute: AuthResetRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

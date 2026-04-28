@@ -1,4 +1,4 @@
-import { db } from '#/db/index'
+import { blocksService } from '#/services/blocks'
 
 export function toDateStr(date: Date): string {
   return date.toISOString().slice(0, 10)
@@ -14,22 +14,11 @@ export function subtractDays(dateStr: string, days: number): string {
   return toDateStr(d)
 }
 
-// Returns an object with the total minutes for each date in the given set
 export async function getDailyTotals(
   dates: string[],
   planId: number,
 ): Promise<Record<string, number>> {
-  const datesSet = new Set(dates)
-  const blocks = await db.daily_blocks
-    .where('plan_id')
-    .equals(planId)
-    .and((block) => datesSet.has(block.date))
-    .toArray()
-  const totals: Record<string, number> = {}
-  for (const b of blocks) {
-    totals[b.date] = (totals[b.date] ?? 0) + b.duration_minutes
-  }
-  return totals
+  return blocksService.getTotalMinutesForDates(planId, dates)
 }
 
 export async function calculateStreak(
@@ -37,19 +26,12 @@ export async function calculateStreak(
   minimumMinutes: number,
 ): Promise<number> {
   let streak = 0
-  const cursor = todayStr()
-  // Check up to 365 days back
   for (let i = 0; i < 365; i++) {
-    const dateToCheck = i === 0 ? cursor : subtractDays(todayStr(), i)
-    const total = await db.daily_blocks
-      .where('[plan_id+date]')
-      .equals([planId, dateToCheck])
-      .toArray()
-      .then((blocks) => blocks.reduce((sum, b) => sum + b.duration_minutes, 0))
+    const date = i === 0 ? todayStr() : subtractDays(todayStr(), i)
+    const total = await blocksService.getTotalMinutesForDate(planId, date)
     if (total >= minimumMinutes) {
       streak++
     } else {
-      // Allow today to be incomplete without breaking streak
       if (i === 0) continue
       break
     }

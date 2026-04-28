@@ -4,8 +4,9 @@ import { ActivityTypeChip, typeConfig } from '#/components/ui/ActivityTypeChip'
 import { Modal } from '#/components/ui/Modal'
 import { useToast } from '#/components/ui/ToastProvider'
 import { SearchSelect } from '#/components/ui/SearchSelect'
-import { db } from '#/db/index'
+
 import type { ActivityType, DailyBlock } from '#/db/index'
+import { blocksService } from '#/services/blocks'
 import {
   useBlocksForDate,
   useResources,
@@ -14,7 +15,7 @@ import {
 import { todayStr } from '#/lib/streak'
 import { useProfileStore } from '#/store/profile'
 
-export const Route = createFileRoute('/log')({
+export const Route = createFileRoute('/app/log')({
   component: ActivityLog,
 })
 
@@ -158,7 +159,7 @@ function BlockForm({
       block.custom_resource_text = form.custom_resource_text
     if (form.notes) block.notes = form.notes
     try {
-      await db.daily_blocks.add(block)
+      await blocksService.create(block)
       setForm({ ...emptyForm })
       toast.success('Activity block saved.')
       onSave()
@@ -399,7 +400,7 @@ function EditBlockModal({
       return
     }
     try {
-      await db.daily_blocks.update(block.id!, {
+      await blocksService.update(block.id!, {
         type: form.type,
         duration_minutes: mins,
         start_time: form.start_time || undefined,
@@ -518,7 +519,7 @@ function ActivityLog() {
     async (id: number) => {
       if (!confirm('Delete this block?')) return
       try {
-        await db.daily_blocks.delete(id)
+        await blocksService.delete(id)
         toast.success('Activity block deleted.')
       } catch {
         toast.error('Could not delete block. Please try again.')

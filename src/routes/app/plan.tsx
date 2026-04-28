@@ -8,7 +8,7 @@ import { getDefaultPlanTemplate } from '#/services/plans'
 import type { PlanTemplateBlock, StudyPlan, WeeklyPlanTemplate } from '#/services/types'
 import { useProfileStore } from '#/store/profile'
 
-export const Route = createFileRoute('/plan')({
+export const Route = createFileRoute('/app/plan')({
   component: PlanEditor,
 })
 

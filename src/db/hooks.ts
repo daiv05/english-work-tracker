@@ -1,118 +1,113 @@
-import { useLiveQuery } from 'dexie-react-hooks'
-import { db } from '#/db/index'
+import { useEffect, useState, useCallback } from 'react'
+import { blocksService } from '#/services/blocks'
+import { writingService } from '#/services/writing'
+import { categoriesService, resourcesService } from '#/services/resources'
 import { todayStr, calculateStreak, getWeeklyTotalsForPlan } from '#/lib/streak'
 import { useProfileStore } from '#/store/profile'
+import type { DailyBlock, WritingEntry, ResourceCategory, Resource } from '#/db/index'
 
-export function useBlocksForDate(date: string) {
+function useApiData<T>(
+  fetcher: () => Promise<T>,
+  initial: T,
+  deps: unknown[],
+): T {
+  const [data, setData] = useState<T>(initial)
+  const fetch = useCallback(fetcher, deps) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    let cancelled = false
+    fetch().then((result) => {
+      if (!cancelled) setData(result)
+    }).catch(() => {/* ignore */})
+    return () => { cancelled = true }
+  }, [fetch])
+  return data
+}
+
+export function useBlocksForDate(date: string): DailyBlock[] {
   const activePlanId = useProfileStore((s) => s.activePlanId)
-  return (
-    useLiveQuery(() => {
-      if (!activePlanId) return []
-      return db.daily_blocks
-        .where('[plan_id+date]')
-        .equals([activePlanId, date])
-        .sortBy('created_at')
-    }, [date, activePlanId]) ?? []
+  return useApiData(
+    () => activePlanId ? blocksService.getForDate(activePlanId, date) : Promise.resolve([]),
+    [],
+    [activePlanId, date],
   )
 }
 
-export function useTodayStats() {
+export function useTodayStats(): { minutes: number; blockCount: number } {
   const activePlanId = useProfileStore((s) => s.activePlanId)
-  return (
-    useLiveQuery(async () => {
+  return useApiData(
+    async () => {
       if (!activePlanId) return { minutes: 0, blockCount: 0 }
       const today = todayStr()
-      const blocks = await db.daily_blocks
-        .where('[plan_id+date]')
-        .equals([activePlanId, today])
-        .toArray()
+      const blocks = await blocksService.getForDate(activePlanId, today)
       const minutes = blocks.reduce((sum, b) => sum + b.duration_minutes, 0)
       return { minutes, blockCount: blocks.length }
-    }, [activePlanId]) ?? { minutes: 0, blockCount: 0 }
+    },
+    { minutes: 0, blockCount: 0 },
+    [activePlanId],
   )
 }
 
-export function useStreak() {
+export function useStreak(): number {
   const activePlanId = useProfileStore((s) => s.activePlanId)
   const plans = useProfileStore((s) => s.plans)
   const goalMinutes = plans.find((p) => p.id === activePlanId)?.daily_goal_minutes ?? 60
-  return (
-    useLiveQuery(() => {
-      if (!activePlanId) return 0
-      return calculateStreak(activePlanId, goalMinutes)
-    }, [activePlanId, goalMinutes]) ?? 0
+  return useApiData(
+    () => activePlanId ? calculateStreak(activePlanId, goalMinutes) : Promise.resolve(0),
+    0,
+    [activePlanId, goalMinutes],
   )
 }
 
-export function useWeeklyProgress() {
+export function useWeeklyProgress(): { date: string; minutes: number }[] {
   const activePlanId = useProfileStore((s) => s.activePlanId)
-  return (
-    useLiveQuery(() => {
-      if (!activePlanId) return []
-      return getWeeklyTotalsForPlan(activePlanId)
-    }, [activePlanId]) ?? []
+  return useApiData(
+    () => activePlanId ? getWeeklyTotalsForPlan(activePlanId) : Promise.resolve([]),
+    [],
+    [activePlanId],
   )
 }
 
-export function useWritingHistory() {
+export function useWritingHistory(): WritingEntry[] {
   const activePlanId = useProfileStore((s) => s.activePlanId)
-  return (
-    useLiveQuery(async () => {
-      if (!activePlanId) return []
-      const entries = await db.writing_entries
-        .where('plan_id')
-        .equals(activePlanId)
-        .toArray()
-      return entries.sort((a, b) => b.created_at - a.created_at)
-    }, [activePlanId]) ?? []
+  return useApiData(
+    () => activePlanId ? writingService.getAll(activePlanId) : Promise.resolve([]),
+    [],
+    [activePlanId],
   )
 }
 
-export function useWritingEntriesForDate(date: string) {
+export function useWritingEntriesForDate(date: string): WritingEntry[] {
   const activePlanId = useProfileStore((s) => s.activePlanId)
-  return (
-    useLiveQuery(() => {
-      if (!activePlanId) return []
-      return db.writing_entries
-        .where('[plan_id+date]')
-        .equals([activePlanId, date])
-        .sortBy('created_at')
-    }, [date, activePlanId]) ?? []
+  return useApiData(
+    () => activePlanId ? writingService.getForDate(activePlanId, date) : Promise.resolve([]),
+    [],
+    [activePlanId, date],
   )
 }
 
-export function useResourceCategories() {
+export function useResourceCategories(): ResourceCategory[] {
   const activePlanId = useProfileStore((s) => s.activePlanId)
-  return (
-    useLiveQuery(() => {
-      if (!activePlanId) return []
-      return db.resource_categories
-        .where('plan_id')
-        .equals(activePlanId)
-        .sortBy('name')
-    }, [activePlanId]) ?? []
+  return useApiData(
+    () => activePlanId ? categoriesService.getAll(activePlanId) : Promise.resolve([]),
+    [],
+    [activePlanId],
   )
 }
 
-export function useResources() {
+export function useResources(): Resource[] {
   const activePlanId = useProfileStore((s) => s.activePlanId)
-  return (
-    useLiveQuery(() => {
-      if (!activePlanId) return []
-      return db.resources.where('plan_id').equals(activePlanId).sortBy('title')
-    }, [activePlanId]) ?? []
+  return useApiData(
+    () => activePlanId ? resourcesService.getAll(activePlanId) : Promise.resolve([]),
+    [],
+    [activePlanId],
   )
 }
 
-export function useResourcesForCategory(categoryId: number) {
+export function useResourcesForCategory(categoryId: number): Resource[] {
   const activePlanId = useProfileStore((s) => s.activePlanId)
-  return (
-    useLiveQuery(() => {
-      if (!activePlanId) return []
-      return db.resources
-        .where('[plan_id+category_id]')
-        .equals([activePlanId, categoryId])
-        .toArray()
-    }, [categoryId, activePlanId]) ?? []
+  return useApiData(
+    () => activePlanId ? resourcesService.getForCategory(activePlanId, categoryId) : Promise.resolve([]),
+    [],
+    [activePlanId, categoryId],
   )
 }

@@ -10,8 +10,8 @@ interface ProfileStore extends UserProfile {
   plans: StudyPlan[]
   activePlanId?: number
   isInitialized: boolean
-  setUsername: (username: string) => void
-  setAvatarData: (avatarData: string | undefined) => void
+  setUsername: (username: string) => Promise<void>
+  setAvatarData: (avatarData: string | undefined) => Promise<void>
   updateActivePlan: (changes: Partial<StudyPlan>) => Promise<void>
   updatePlanById: (planId: number, changes: Partial<StudyPlan>) => Promise<void>
   setActivePlan: (planId: number) => Promise<void>
@@ -21,18 +21,18 @@ interface ProfileStore extends UserProfile {
 }
 
 export const useProfileStore = create<ProfileStore>((set, get) => ({
-  ...profileService.get(),
+  ...profileService.getDefaults(),
   plans: [],
   activePlanId: undefined,
   isInitialized: false,
 
-  setUsername(username) {
-    const updated = profileService.update({ username })
+  async setUsername(username) {
+    const updated = await profileService.update({ username })
     set(updated)
   },
 
-  setAvatarData(avatarData) {
-    const updated = profileService.update({ avatarData })
+  async setAvatarData(avatarData) {
+    const updated = await profileService.update({ avatarData })
     set(updated)
   },
 
@@ -42,14 +42,14 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
     await plansService.update(activePlanId, changes)
     const plans = await plansService.list()
     const active = plans.find((plan) => plan.is_active) ?? plans[0]
-    set({ plans, activePlanId: active.id })
+    set({ plans, activePlanId: active?.id })
   },
 
   async setActivePlan(planId) {
     await plansService.setActive(planId)
     const plans = await plansService.list()
     const active = plans.find((plan) => plan.is_active) ?? plans.find((plan) => plan.id === planId) ?? plans[0]
-    set({ plans, activePlanId: active.id })
+    set({ plans, activePlanId: active?.id })
   },
 
   async createPlan(name) {
@@ -58,7 +58,7 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
     const newId = await plansService.create({ name: trimmed })
     const plans = await plansService.list()
     const active = plans.find((p) => p.is_active) ?? plans[0]
-    set({ plans, activePlanId: active.id })
+    set({ plans, activePlanId: active?.id })
     return newId
   },
 
@@ -66,26 +66,26 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
     await plansService.update(planId, changes)
     const plans = await plansService.list()
     const active = plans.find((plan) => plan.is_active) ?? plans[0]
-    set({ plans, activePlanId: active.id })
+    set({ plans, activePlanId: active?.id })
   },
 
   async deletePlan(planId) {
     await plansService.delete(planId)
     const plans = await plansService.list()
     const active = plans.find((p) => p.is_active) ?? plans[0]
-    set({ plans, activePlanId: active.id })
+    set({ plans, activePlanId: active?.id })
   },
 
   _init() {
     if (!_initPromise) {
       _initPromise = (async () => {
         try {
-          const profile = profileService.get()
+          const profile = await profileService.get()
           await plansService.ensureDefaultPlan()
           const plans = await plansService.list()
           const active = plans.find((plan) => plan.is_active) ?? plans[0]
-          if (active.id) await seedDefaultResources(active.id)
-          set({ ...profile, plans, activePlanId: active.id, isInitialized: true })
+          if (active?.id) await seedDefaultResources(active.id)
+          set({ ...profile, plans, activePlanId: active?.id, isInitialized: true })
         } catch {
           _initPromise = null
           set({ isInitialized: true })

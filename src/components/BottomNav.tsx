@@ -2,7 +2,7 @@ import { Link, useRouterState } from '@tanstack/react-router'
 
 const navLinks = [
   {
-    to: '/',
+    to: '/app',
     label: 'Dashboard',
     icon: (active: boolean) => (
       <svg
@@ -26,7 +26,7 @@ const navLinks = [
     ),
   },
   {
-    to: '/log',
+    to: '/app/log',
     label: 'Log',
     icon: (active: boolean) => (
       <svg
@@ -50,7 +50,7 @@ const navLinks = [
     ),
   },
   {
-    to: '/writing',
+    to: '/app/writing',
     label: 'Write',
     icon: (active: boolean) => (
       <svg
@@ -74,7 +74,7 @@ const navLinks = [
     ),
   },
   {
-    to: '/resources',
+    to: '/app/resources',
     label: 'Resources',
     icon: (active: boolean) => (
       <svg
@@ -98,7 +98,7 @@ const navLinks = [
     ),
   },
   {
-    to: '/plan',
+    to: '/app/plan',
     label: 'Plan',
     icon: (active: boolean) => (
       <svg
@@ -130,8 +130,8 @@ export function BottomNav() {
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-outline-variant flex">
       {navLinks.map((link) => {
         const isActive =
-          link.to === '/'
-            ? location.pathname === '/'
+          link.to === '/app'
+            ? location.pathname === '/app'
             : location.pathname.startsWith(link.to)
         return (
           <Link

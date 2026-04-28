@@ -4,11 +4,11 @@ import { ProfileModal } from './ProfileModal'
 import { useProfileStore } from '#/store/profile'
 
 const PAGE_TITLES: Record<string, string> = {
-  '/': 'Dashboard',
-  '/log': 'Activity Log',
-  '/writing': 'Writing Mode',
-  '/resources': 'Resources',
-  '/plan': 'Plan Builder',
+  '/app': 'Dashboard',
+  '/app/log': 'Activity Log',
+  '/app/writing': 'Writing Mode',
+  '/app/resources': 'Resources',
+  '/app/plan': 'Plan Builder',
   '/privacy': 'Privacy',
 }
 
@@ -23,7 +23,7 @@ export function TopHeader() {
     <>
       {/* Mobile-only top header */}
       <header className="md:hidden fixed top-0 left-0 right-0 z-20 h-14 bg-white/95 backdrop-blur-sm border-b border-surface-high flex items-center justify-between px-4">
-        <Link to="/" className="flex items-center gap-2">
+        <Link to="/app" className="flex items-center gap-2">
           <img
             src="/manifest-icon-192.maskable.png"
             alt="EW"

@@ -1,52 +1,79 @@
-// Service layer for daily_blocks.
-// To migrate to API: replace each function body with a fetch() call to your backend.
-// The call signatures and return types must stay the same.
-
-import { db } from '#/db/index'
+import { apiFetch } from '#/lib/api'
+import { useAuthStore } from '#/store/auth'
 import type { DailyBlock } from '#/db/index'
 
+function token() {
+  return useAuthStore.getState().accessToken ?? undefined
+}
+
+interface ApiBlock {
+  id: number
+  plan_id: number
+  date: string
+  start_time: string | null
+  type: string
+  resource_id: number | null
+  custom_resource_text: string | null
+  duration_minutes: number
+  notes: string | null
+  created_at: number
+}
+
+function toBlock(b: ApiBlock): DailyBlock {
+  return {
+    id: b.id,
+    plan_id: b.plan_id,
+    date: b.date,
+    start_time: b.start_time ?? undefined,
+    type: b.type as DailyBlock['type'],
+    resource_id: b.resource_id ?? undefined,
+    custom_resource_text: b.custom_resource_text ?? undefined,
+    duration_minutes: b.duration_minutes,
+    notes: b.notes ?? undefined,
+    created_at: b.created_at,
+  }
+}
+
 export const blocksService = {
-  getForDate(planId: number, date: string): Promise<DailyBlock[]> {
-    return db.daily_blocks
-      .where('[plan_id+date]')
-      .equals([planId, date])
-      .sortBy('created_at')
+  async getForDate(planId: number, date: string): Promise<DailyBlock[]> {
+    const blocks = await apiFetch<ApiBlock[]>(`/blocks?plan_id=${planId}&date=${date}`, { token: token() })
+    return blocks.map(toBlock)
   },
 
   async getTotalMinutesForDate(planId: number, date: string): Promise<number> {
-    const blocks = await db.daily_blocks
-      .where('[plan_id+date]')
-      .equals([planId, date])
-      .toArray()
+    const blocks = await blocksService.getForDate(planId, date)
     return blocks.reduce((sum, b) => sum + b.duration_minutes, 0)
   },
 
-  async getTotalMinutesForDates(
-    planId: number,
-    dates: string[],
-  ): Promise<Record<string, number>> {
-    const datesSet = new Set(dates)
-    const blocks = await db.daily_blocks
-      .where('plan_id')
-      .equals(planId)
-      .and((block) => datesSet.has(block.date))
-      .toArray()
-    const totals: Record<string, number> = {}
-    for (const b of blocks) {
-      totals[b.date] = (totals[b.date] ?? 0) + b.duration_minutes
+  async getTotalMinutesForDates(planId: number, dates: string[]): Promise<Record<string, number>> {
+    if (dates.length === 0) return {}
+    const query = dates.map((d) => `dates=${d}`).join('&')
+    const rows = await apiFetch<{ date: string; total_minutes: number }[]>(
+      `/blocks/totals?plan_id=${planId}&${query}`,
+      { token: token() },
+    )
+    const result: Record<string, number> = {}
+    for (const row of rows) {
+      result[row.date] = row.total_minutes
     }
-    return totals
+    return result
   },
 
-  create(block: Omit<DailyBlock, 'id'>): Promise<number> {
-    return db.daily_blocks.add(block) as Promise<number>
+  async create(block: Omit<DailyBlock, 'id'>): Promise<number> {
+    const created = await apiFetch<ApiBlock>('/blocks', {
+      method: 'POST',
+      token: token(),
+      body: JSON.stringify(block),
+    })
+    return created.id
   },
 
-  update(id: number, changes: Partial<DailyBlock>): Promise<number> {
-    return db.daily_blocks.update(id, changes)
+  async update(id: number, changes: Partial<DailyBlock>): Promise<number> {
+    await apiFetch(`/blocks/${id}`, { method: 'PUT', token: token(), body: JSON.stringify(changes) })
+    return 1
   },
 
-  delete(id: number): Promise<void> {
-    return db.daily_blocks.delete(id)
+  async delete(id: number): Promise<void> {
+    await apiFetch(`/blocks/${id}`, { method: 'DELETE', token: token() })
   },
 }

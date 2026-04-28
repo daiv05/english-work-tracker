@@ -1,8 +1,10 @@
-// Service layer for resources and resource_categories.
-// To migrate to API: replace each function body with a fetch() call to your backend.
-
-import { db } from '#/db/index'
+import { apiFetch } from '#/lib/api'
+import { useAuthStore } from '#/store/auth'
 import type { Resource, ResourceCategory } from '#/db/index'
+
+function token() {
+  return useAuthStore.getState().accessToken ?? undefined
+}
 
 const DEFAULT_SEED: Array<{ name: string; resources: Array<{ title: string; url: string; tags: string[] }> }> = [
   {
@@ -55,76 +57,101 @@ const DEFAULT_SEED: Array<{ name: string; resources: Array<{ title: string; url:
   },
 ]
 
+interface ApiCategory {
+  id: number
+  plan_id: number
+  name: string
+  created_at: number
+}
+
+interface ApiResource {
+  id: number
+  plan_id: number
+  category_id: number
+  title: string
+  url: string | null
+  notes: string | null
+  tags: string[]
+  created_at: number
+}
+
 export const categoriesService = {
-  getAll(planId: number): Promise<ResourceCategory[]> {
-    return db.resource_categories.where('plan_id').equals(planId).sortBy('name')
+  async getAll(planId: number): Promise<ResourceCategory[]> {
+    return apiFetch<ApiCategory[]>(`/resource-categories?plan_id=${planId}`, { token: token() })
   },
 
-  create(planId: number, name: string): Promise<number> {
-    return db.resource_categories.add({
-      plan_id: planId,
-      name,
-      created_at: Date.now(),
-    }) as Promise<number>
+  async create(planId: number, name: string): Promise<number> {
+    const cat = await apiFetch<ApiCategory>('/resource-categories', {
+      method: 'POST',
+      token: token(),
+      body: JSON.stringify({ plan_id: planId, name, created_at: Date.now() }),
+    })
+    return cat.id
   },
 
-  delete(id: number): Promise<void> {
-    return db.resource_categories.delete(id)
+  async delete(id: number): Promise<void> {
+    await apiFetch(`/resource-categories/${id}`, { method: 'DELETE', token: token() })
   },
 }
 
+function mapResource(r: ApiResource): Resource {
+  return { ...r, url: r.url ?? undefined, notes: r.notes ?? undefined }
+}
+
 export const resourcesService = {
-  getAll(planId: number): Promise<Resource[]> {
-    return db.resources.where('plan_id').equals(planId).sortBy('title')
+  async getAll(planId: number): Promise<Resource[]> {
+    const items = await apiFetch<ApiResource[]>(`/resources?plan_id=${planId}`, { token: token() })
+    return items.map(mapResource)
   },
 
-  getForCategory(planId: number, categoryId: number): Promise<Resource[]> {
-    return db.resources
-      .where('[plan_id+category_id]')
-      .equals([planId, categoryId])
-      .toArray()
+  async getForCategory(planId: number, categoryId: number): Promise<Resource[]> {
+    const items = await apiFetch<ApiResource[]>(`/resources?plan_id=${planId}&category_id=${categoryId}`, { token: token() })
+    return items.map(mapResource)
   },
 
-  create(resource: Omit<Resource, 'id'>): Promise<number> {
-    return db.resources.add(resource) as Promise<number>
+  async create(resource: Omit<Resource, 'id'>): Promise<number> {
+    const created = await apiFetch<ApiResource>('/resources', {
+      method: 'POST',
+      token: token(),
+      body: JSON.stringify(resource),
+    })
+    return created.id
   },
 
-  update(id: number, changes: Partial<Resource>): Promise<number> {
-    return db.resources.update(id, changes)
+  async update(id: number, changes: Partial<Resource>): Promise<number> {
+    await apiFetch(`/resources/${id}`, { method: 'PUT', token: token(), body: JSON.stringify(changes) })
+    return 1
   },
 
-  delete(id: number): Promise<void> {
-    return db.resources.delete(id)
+  async delete(id: number): Promise<void> {
+    await apiFetch(`/resources/${id}`, { method: 'DELETE', token: token() })
   },
 
-  deleteForCategory(planId: number, categoryId: number): Promise<number> {
-    return db.resources
-      .where('[plan_id+category_id]')
-      .equals([planId, categoryId])
-      .delete()
+  async deleteForCategory(_planId: number, categoryId: number): Promise<number> {
+    // Category deletion cascades on the server side; this is a no-op
+    void categoryId
+    return 0
   },
 }
 
 export async function seedDefaultResources(planId: number): Promise<void> {
-  const existing = await db.resource_categories.where('plan_id').equals(planId).count()
-  if (existing > 0) return
+  const existing = await categoriesService.getAll(planId)
+  if (existing.length > 0) return
 
   const now = Date.now()
   for (const section of DEFAULT_SEED) {
-    const catId = (await db.resource_categories.add({
-      plan_id: planId,
-      name: section.name,
-      created_at: now,
-    })) as number
+    const catId = await categoriesService.create(planId, section.name)
+    // Use plan_id's first category as the created_at anchor
+    void now
     for (const r of section.resources) {
-      await db.resources.add({
+      await resourcesService.create({
         plan_id: planId,
         category_id: catId,
         title: r.title,
         url: r.url,
         notes: '',
         tags: r.tags,
-        created_at: now,
+        created_at: Date.now(),
       })
     }
   }

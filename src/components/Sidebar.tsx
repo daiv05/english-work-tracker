@@ -6,7 +6,7 @@ import { Select } from './ui/Select'
 
 const navLinks = [
   {
-    to: '/',
+    to: '/app',
     label: 'Dashboard',
     icon: (
       <svg
@@ -26,7 +26,7 @@ const navLinks = [
     ),
   },
   {
-    to: '/log',
+    to: '/app/log',
     label: 'Activity Log',
     icon: (
       <svg
@@ -46,7 +46,7 @@ const navLinks = [
     ),
   },
   {
-    to: '/writing',
+    to: '/app/writing',
     label: 'Writing Mode',
     icon: (
       <svg
@@ -66,7 +66,7 @@ const navLinks = [
     ),
   },
   {
-    to: '/resources',
+    to: '/app/resources',
     label: 'Resources',
     icon: (
       <svg
@@ -86,7 +86,7 @@ const navLinks = [
     ),
   },
   {
-    to: '/plan',
+    to: '/app/plan',
     label: 'Plan Editor',
     icon: (
       <svg
@@ -150,7 +150,7 @@ export function Sidebar() {
       <aside className="hidden md:flex flex-col w-64 min-h-screen bg-primary-dark text-white fixed left-0 top-0 z-30 border-r border-white/5">
         {/* App Brand */}
         <div className="px-5 pt-6 pb-4">
-          <Link to="/" className="flex items-center gap-2.5 mb-1 hover:opacity-80 transition-opacity">
+          <Link to="/app" className="flex items-center gap-2.5 mb-1 hover:opacity-80 transition-opacity">
             <img
               src="/manifest-icon-192.maskable.png"
               alt="EW"
@@ -238,8 +238,8 @@ export function Sidebar() {
         <nav className="flex-1 px-3 space-y-0.5">
           {navLinks.map((link) => {
             const isActive =
-              link.to === '/'
-                ? location.pathname === '/'
+              link.to === '/app'
+                ? location.pathname === '/app'
                 : location.pathname.startsWith(link.to)
             return (
               <Link

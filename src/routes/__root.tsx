@@ -1,8 +1,7 @@
 import { HeadContent, Link, Outlet, Scripts, createRootRoute } from '@tanstack/react-router'
 import { useEffect } from 'react'
-import { Layout } from '#/components/Layout'
 import { ToastProvider } from '#/components/ui/ToastProvider'
-import { useProfileStore } from '#/store/profile'
+import { useAuthStore } from '#/store/auth'
 
 import appCss from '../styles.css?url'
 
@@ -12,7 +11,7 @@ export const Route = createRootRoute({
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       { name: 'theme-color', content: '#000000' },
-      { title: 'English Work Tracker' },
+      { title: 'Engrow' },
     ],
     links: [
       { rel: 'stylesheet', href: appCss },
@@ -44,14 +43,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 
 function RootLayout() {
   useEffect(() => {
-    void useProfileStore.getState()._init()
+    void useAuthStore.getState()._restoreSession()
   }, [])
 
   return (
     <ToastProvider>
-      <Layout>
-        <Outlet />
-      </Layout>
+      <Outlet />
     </ToastProvider>
   )
 }
@@ -68,7 +65,7 @@ function RootNotFound() {
           The page you are looking for does not exist or was moved.
         </p>
         <Link
-          to="/"
+          to="/app"
           className="inline-flex items-center gap-2 rounded-lg bg-primary-dark text-white px-4 py-2 text-sm font-semibold hover:bg-primary-dark-hover transition-colors"
         >
           Go to Dashboard
@@ -90,7 +87,7 @@ function ErrorComponent() {
           Something went wrong while loading the page. Please try again later.
         </p>
         <Link
-          to="/"
+          to="/app"
           className="inline-flex items-center gap-2 rounded-lg bg-primary-dark text-white px-4 py-2 text-sm font-semibold hover:bg-primary-dark-hover transition-colors"
         >
           Go to Dashboard

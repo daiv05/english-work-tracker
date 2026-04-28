@@ -1,34 +1,30 @@
-// Service layer for user profile.
-// Currently uses localStorage for instant read on mount.
-// To migrate to API: swap getProfile/saveProfile with fetch() calls; keep the same interface.
-
+import { apiFetch } from '#/lib/api'
+import { useAuthStore } from '#/store/auth'
 import type { UserProfile } from './types'
 
-const STORAGE_KEY = 'ew_profile'
-
-const DEFAULTS: UserProfile = {
-  username: 'You',
-}
-
 export const profileService = {
-  get(): UserProfile {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY)
-      if (!raw) return { ...DEFAULTS }
-      return { ...DEFAULTS, ...JSON.parse(raw) }
-    } catch {
-      return { ...DEFAULTS }
-    }
+  getDefaults(): UserProfile {
+    return { username: 'You' }
   },
 
-  save(profile: UserProfile): void {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(profile))
+  async get(): Promise<UserProfile> {
+    const token = useAuthStore.getState().accessToken
+    if (!token) return { username: 'You' }
+    const data = await apiFetch<{ display_name: string; avatar_data: string | null }>('/users/me', { token })
+    return { username: data.display_name, avatarData: data.avatar_data ?? undefined }
   },
 
-  update(changes: Partial<UserProfile>): UserProfile {
-    const current = profileService.get()
-    const updated = { ...current, ...changes }
-    profileService.save(updated)
-    return updated
+  async update(changes: Partial<UserProfile>): Promise<UserProfile> {
+    const token = useAuthStore.getState().accessToken
+    if (!token) return profileService.getDefaults()
+    const body: Record<string, unknown> = {}
+    if (changes.username !== undefined) body.display_name = changes.username
+    if (changes.avatarData !== undefined) body.avatar_data = changes.avatarData
+    const data = await apiFetch<{ display_name: string; avatar_data: string | null }>('/users/me', {
+      method: 'PUT',
+      body: JSON.stringify(body),
+      token,
+    })
+    return { username: data.display_name, avatarData: data.avatar_data ?? undefined }
   },
 }

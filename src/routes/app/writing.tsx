@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import { db } from '#/db/index'
+import { writingService } from '#/services/writing'
+import { blocksService } from '#/services/blocks'
 import { useWritingEntriesForDate } from '#/db/hooks'
 import { useToast } from '#/components/ui/ToastProvider'
 import { Select } from '#/components/ui/Select'
 import { todayStr } from '#/lib/streak'
 import { useProfileStore } from '#/store/profile'
 
-export const Route = createFileRoute('/writing')({
+export const Route = createFileRoute('/app/writing')({
   component: WritingMode,
 })
 
@@ -94,27 +95,28 @@ function WritingMode() {
 
   async function ensureLinkedBlock(entryId: number, mins: number, wc: number) {
     if (!activePlanId) return
-    const entry = await db.writing_entries.get(entryId)
+    const allEntries = await writingService.getForDate(activePlanId, today)
+    const entry = allEntries.find((e) => e.id === entryId)
     if (!entry) return
 
     if (entry.linked_block_id) {
-      await db.daily_blocks.update(entry.linked_block_id, {
+      await blocksService.update(entry.linked_block_id, {
         duration_minutes: mins,
         notes: `Writing: ${wc} words`,
       })
       return
     }
 
-    const blockId = (await db.daily_blocks.add({
+    const blockId = await blocksService.create({
       plan_id: activePlanId,
       date: today,
       type: 'Writing',
       duration_minutes: mins,
       notes: `Writing: ${wc} words`,
       created_at: Date.now(),
-    })) as number
+    })
 
-    await db.writing_entries.update(entryId, { linked_block_id: blockId })
+    await writingService.update(entryId, { linked_block_id: blockId })
   }
 
   // Timer — only ticks after user starts typing
@@ -143,13 +145,13 @@ function WritingMode() {
     const wc = countWords(text)
     const mins = Math.max(1, Math.round(elapsedSec / 60))
     if (savedId) {
-      await db.writing_entries.update(savedId, {
+      await writingService.update(savedId, {
         text,
         word_count: wc,
         active_time_minutes: mins,
       })
     } else {
-      const id = await db.writing_entries.add({
+      const id = await writingService.create({
         plan_id: activePlanId,
         date: today,
         text,
@@ -188,14 +190,14 @@ function WritingMode() {
       const wc = countWords(text)
       const mins = Math.max(1, Math.round(elapsedSec / 60))
       if (savedId) {
-        await db.writing_entries.update(savedId, {
+        await writingService.update(savedId, {
           text,
           word_count: wc,
           active_time_minutes: mins,
         })
         await ensureLinkedBlock(savedId, mins, wc)
       } else {
-        const entryId = await db.writing_entries.add({
+        const entryId = await writingService.create({
           plan_id: activePlanId,
           date: today,
           text,
@@ -221,12 +223,13 @@ function WritingMode() {
   async function handleDiscard() {
     if (text.trim() && !confirm('Discard this writing session?')) return
 
-    if (savedId) {
-      const entry = await db.writing_entries.get(savedId)
+    if (savedId && activePlanId) {
+      const entries = await writingService.getForDate(activePlanId, today)
+      const entry = entries.find((e) => e.id === savedId)
       if (entry?.linked_block_id) {
-        await db.daily_blocks.delete(entry.linked_block_id)
+        await blocksService.delete(entry.linked_block_id)
       }
-      await db.writing_entries.delete(savedId)
+      await writingService.delete(savedId)
     }
 
     resetComposer()

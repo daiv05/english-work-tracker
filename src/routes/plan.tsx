@@ -409,8 +409,8 @@ function PlanEditor() {
   )
 
   const [form, setForm] = useState<PlanForm>(() => {
-    const { plans, activePlanId } = useProfileStore.getState()
-    const ap = plans.find((p) => p.id === activePlanId)
+    const { plans: plansLocal, activePlanId: activePlanIdLocal } = useProfileStore.getState()
+    const ap = plansLocal.find((p) => p.id === activePlanIdLocal)
     if (ap?.id) {
       try {
         const rawDraft = localStorage.getItem(getDraftKey(ap.id))

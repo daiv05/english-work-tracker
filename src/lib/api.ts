@@ -1,3 +1,5 @@
+import { useRequestStore } from '#/store/requests'
+
 const BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:8010'
 
 export class ApiError extends Error {
@@ -20,19 +22,28 @@ export async function apiFetch<T>(
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   }
 
-  const res = await fetch(`${BASE}${path}`, { ...rest, headers })
+  const { increment, decrement, invalidate } = useRequestStore.getState()
+  const method = (rest.method ?? 'GET').toUpperCase()
+  const isMutation = method !== 'GET'
+  increment()
+  try {
+    const res = await fetch(`${BASE}${path}`, { ...rest, headers })
 
-  if (!res.ok) {
-    let detail = 'API error'
-    try {
-      const body = (await res.json()) as { detail?: string }
-      if (body.detail) detail = body.detail
-    } catch {
-      // ignore parse errors
+    if (!res.ok) {
+      let detail = 'API error'
+      try {
+        const body = (await res.json()) as { detail?: string }
+        if (body.detail) detail = body.detail
+      } catch {
+        // ignore parse errors
+      }
+      throw new ApiError(res.status, detail)
     }
-    throw new ApiError(res.status, detail)
-  }
 
-  if (res.status === 204) return undefined as T
-  return res.json() as Promise<T>
+    if (isMutation) invalidate()
+    if (res.status === 204) return undefined as T
+    return res.json() as Promise<T>
+  } finally {
+    decrement()
+  }
 }

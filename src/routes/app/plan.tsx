@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { createFileRoute, useBlocker } from '@tanstack/react-router'
 import { Modal } from '#/components/ui/Modal'
 import { Select } from '#/components/ui/Select'
 import type { ActivityType } from '#/db/index'
 import { useToast } from '#/components/ui/ToastProvider'
 import { getDefaultPlanTemplate } from '#/services/plans'
+import { exportPlanTemplate, importPlanTemplate } from '#/services/importExport'
 import type { PlanTemplateBlock, StudyPlan, WeeklyPlanTemplate } from '#/services/types'
 import { useProfileStore } from '#/store/profile'
 
@@ -434,6 +435,35 @@ function PlanEditor() {
 
   const [saving, setSaving] = useState(false)
   const [savedAt, setSavedAt] = useState<number | null>(null)
+  const [importingTemplate, setImportingTemplate] = useState(false)
+  const templateImportRef = useRef<HTMLInputElement>(null)
+
+  function handleExportTemplate() {
+    if (!editingPlan) return
+    const planSnapshot = { ...editingPlan, template_json: JSON.stringify(form.template) }
+    exportPlanTemplate(planSnapshot)
+  }
+
+  async function handleImportTemplateFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setImportingTemplate(true)
+    try {
+      const text = await file.text()
+      const parsed = importPlanTemplate(text)
+      if (!parsed) {
+        toast.error('Invalid plan template file.')
+        return
+      }
+      setField('template', parsed)
+      toast.success('Template imported. Save to apply.')
+    } catch {
+      toast.error('Could not read file.')
+    } finally {
+      setImportingTemplate(false)
+      if (templateImportRef.current) templateImportRef.current.value = ''
+    }
+  }
 
   const baseForm = useMemo(
     () => (editingPlan ? buildFormFromPlan(editingPlan) : null),
@@ -705,7 +735,33 @@ function PlanEditor() {
                   )}
                 </p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  onClick={handleExportTemplate}
+                  className="cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-lg border border-outline-variant text-sm font-semibold text-on-surface-variant hover:bg-surface-low transition-colors"
+                >
+                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Export
+                </button>
+                <button
+                  onClick={() => templateImportRef.current?.click()}
+                  disabled={importingTemplate}
+                  className="cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-lg border border-outline-variant text-sm font-semibold text-on-surface-variant hover:bg-surface-low transition-colors disabled:opacity-50"
+                >
+                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                  {importingTemplate ? 'Importing…' : 'Import'}
+                </button>
+                <input
+                  ref={templateImportRef}
+                  type="file"
+                  accept=".json"
+                  className="hidden"
+                  onChange={(e) => void handleImportTemplateFile(e)}
+                />
                 <button
                   onClick={resetTemplate}
                   className="cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-lg border border-outline-variant text-sm font-semibold text-on-surface-variant hover:bg-surface-low transition-colors"
@@ -974,8 +1030,8 @@ function PlanEditor() {
               Template
             </p>
             <p className="text-xs text-on-surface-variant leading-relaxed">
-              Starts with the default Work English Study Plan (Mon–Sun + Express Day) with pre-loaded
-              resource categories. Customize blocks after creating.
+              Starts with the default Work English Study Plan (Mon–Sun + Express Day). Add resources
+              from the Resource Library after creating.
             </p>
           </div>
           <div className="flex gap-3 pt-1">

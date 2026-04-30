@@ -6,7 +6,7 @@ function token() {
   return useAuthStore.getState().accessToken ?? undefined
 }
 
-const DEFAULT_SEED: Array<{ name: string; resources: Array<{ title: string; url: string; tags: string[] }> }> = [
+export const DEFAULT_SEED: Array<{ name: string; resources: Array<{ title: string; url: string; tags: string[] }> }> = [
   {
     name: 'Daily Life',
     resources: [
@@ -51,7 +51,7 @@ const DEFAULT_SEED: Array<{ name: string; resources: Array<{ title: string; url:
     resources: [
       { title: 'English with Lucy', url: 'https://www.youtube.com/@EnglishWithLucy', tags: ['listening', 'speaking', 'general'] },
       { title: 'Learn English with TV Series', url: 'https://www.youtube.com/@LearnEnglishWithTVSeries', tags: ['listening', 'vocabulary', 'entertainment'] },
-      { title: 'TED-Ed', url: 'https://www.youtube.com/@TED-Ed', tags: ['listening', 'ideas', 'education'] },
+      { title: 'TED', url: 'https://www.youtube.com/@TED', tags: ['listening', 'ideas', 'education'] },
       { title: 'Crash Course', url: 'https://www.youtube.com/@crashcourse', tags: ['listening', 'education', 'varied'] },
     ],
   },

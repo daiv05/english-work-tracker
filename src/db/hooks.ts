@@ -4,6 +4,7 @@ import { writingService } from '#/services/writing'
 import { categoriesService, resourcesService } from '#/services/resources'
 import { todayStr, calculateStreak, getWeeklyTotalsForPlan } from '#/lib/streak'
 import { useProfileStore } from '#/store/profile'
+import { useRequestStore, selectRefreshKey } from '#/store/requests'
 import type { DailyBlock, WritingEntry, ResourceCategory, Resource } from '#/db/index'
 
 function useApiData<T>(
@@ -11,6 +12,7 @@ function useApiData<T>(
   initial: T,
   deps: unknown[],
 ): T {
+  const refreshKey = useRequestStore(selectRefreshKey)
   const [data, setData] = useState<T>(initial)
   const fetch = useCallback(fetcher, deps) // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -19,7 +21,7 @@ function useApiData<T>(
       if (!cancelled) setData(result)
     }).catch(() => {/* ignore */})
     return () => { cancelled = true }
-  }, [fetch])
+  }, [fetch, refreshKey])
   return data
 }
 

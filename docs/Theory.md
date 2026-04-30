@@ -1,321 +1,336 @@
-# PARTE I
+# PART I
 
-# Fundamento Científico del Método
+# Scientific Basis of the Method
 
-El método que estás construyendo se apoya en cuatro grandes líneas de investigación en adquisición de segundas lenguas y ciencias cognitivas:
+The method you are building is based on four major lines of research in second language acquisition and cognitive science:
 
-1. Teoría del Input Comprensible
-2. Hipótesis del Output
-3. Psicología cognitiva del aprendizaje (memoria y repetición espaciada)
-4. Neurociencia del procesamiento y consolidación
+1. Comprehensible Input Theory
+2. Output Hypothesis
+3. Cognitive Psychology of Learning (memory and spaced repetition)
+4. Neuroscience of Processing and Consolidation
 
-A continuación, el marco conceptual completo.
-
----
-
-## 1. Teoría del Input Comprensible
-
-Propuesta por Stephen Krashen en los años 70–80.
-
-### Principio central
-
-Los seres humanos adquieren lenguaje cuando entienden mensajes.
-
-No cuando memorizan reglas.
-No cuando repiten estructuras aisladas.
-No cuando estudian gramática explícita.
-
-Sino cuando procesan significado.
-
-Esto se conoce como **Comprehensible Input**.
+Below is the complete conceptual framework.
 
 ---
 
-### El concepto de i+1
+## 1. Comprehensible Input Theory
 
-El lenguaje óptimo para aprender es:
+Proposed by Stephen Krashen in the 1970s–80s.
 
-* Comprensible
-* Ligeramente por encima del nivel actual
+### Central Principle
 
-Si es demasiado fácil → no hay crecimiento
-Si es demasiado difícil → no hay adquisición
+Human beings acquire language when they understand messages.
 
-Este equilibrio activa el sistema natural de reconocimiento de patrones del cerebro.
+Not when they memorize rules.
 
----
+Not when they repeat isolated structures.
 
-### Evidencia que lo respalda
+Not when they study explicit grammar.
 
-* Estudios en adquisición infantil: los niños reciben miles de horas de input antes de producir lenguaje complejo.
-* Investigación en entornos de inmersión: estudiantes expuestos a gran cantidad de input comprensible desarrollan mejor comprensión y fluidez.
-* Meta-análisis en educación bilingüe muestran que la exposición rica y contextualizada predice mejoras más que la instrucción gramatical aislada.
+But when they process meaning.
+
+This is known as **Comprehensible Input**.
 
 ---
 
-## 2. Distinción entre “Learning” y “Acquisition”
+### The i+1 Concept
 
-Krashen diferencia:
+The optimal language for learning is:
 
-Learning = conocimiento consciente de reglas
-Acquisition = procesamiento subconsciente del lenguaje
+* Understandable
+* Slightly above the current level
 
-La evidencia moderna matiza esta distinción, pero respalda algo clave:
+If it's too easy → there is no growth
+If it's too difficult → there is no acquisition
 
-El conocimiento explícito no se convierte automáticamente en fluidez.
-
-Puedes saber una regla gramatical y no usarla con naturalidad.
-
-La fluidez aparece cuando el cerebro automatiza patrones mediante exposición repetida con significado.
+This balance activates the brain's natural pattern recognition system.
 
 ---
 
-## 3. Hipótesis del Output (Merrill Swain)
+### Supporting Evidence
 
-Investigación posterior mostró que:
+* Studies in child acquisition: children receive thousands of hours of input before producing complex language.
 
-Aunque el input es esencial, la producción también cumple una función importante.
+* Research in immersion environments: students exposed to a large amount of comprehensible input develop better comprehension and fluency.
 
-Hablar y escribir:
-
-* Fuerza al cerebro a notar lagunas en conocimiento
-* Activa procesamiento más profundo
-* Facilita automatización
-
-Conclusión científica actual:
-
-El input construye el sistema.
-El output lo fortalece y ajusta.
+* Meta-analyses in bilingual education show that rich, contextualized exposure predicts improvements more effectively than isolated grammar instruction.
 
 ---
 
-## 4. Repetición Espaciada y Memoria
+## 2. Distinction between “Learning” and “Acquisition”
 
-Desde la psicología cognitiva (Ebbinghaus hasta estudios contemporáneos):
+Krashen differentiates:
 
-* La memoria se consolida mejor con repetición distribuida en el tiempo.
-* La práctica espaciada supera la práctica masiva.
-* La recuperación activa (recall) mejora retención.
+Learning = conscious knowledge of rules
+Acquisition = subconscious language processing
 
-Esto respalda el uso de:
+Modern evidence qualifies this distinction, but supports a key point:
 
-* Sistemas tipo SRS (Spaced Repetition Systems)
-* Revisión de frases reales, no listas aisladas
+Explicit knowledge does not automatically become fluency.
 
-Pero la evidencia también muestra:
+You can know a grammar rule and not use it naturally.
 
-La memoria es más fuerte cuando el aprendizaje es contextual y significativo.
+Fluency emerges when the brain automates patterns through repeated, meaningful exposure.
 
-Por eso el método combina input real + repetición.
+--
 
----
+## 3. Output Hypothesis (Merrill Swain)
 
-## 5. Procesamiento Cognitivo: Focused vs Diffuse Mode
+Subsequent research showed that:
 
-Investigación en aprendizaje complejo muestra que el cerebro alterna entre:
+Although input is essential, output also plays an important role.
 
-Modo enfocado → esfuerzo consciente
-Modo difuso → integración subconsciente
+Speaking and writing:
 
-La consolidación ocurre durante:
+* Force the brain to notice gaps in knowledge
+* Activate deeper processing
+* Facilitate automation
 
-* Descanso
-* Actividades relajadas
-* Sueño
+Current scientific conclusion:
 
-Esto explica por qué:
+Input builds the system.
 
-* No es necesario entender todo inmediatamente
-* Grandes cantidades de input generan “insights” posteriores
+Output strengthens and refines it.
 
 ---
 
-## 6. Percepción Fonética y Shadowing
+## 4. Spaced Repetition and Memory
 
-Estudios en fonología aplicada muestran que:
+From cognitive psychology (Ebbinghaus to contemporary studies):
 
-* La percepción precede a la producción.
-* Entrenar el oído mejora la pronunciación.
-* Técnicas como shadowing mejoran discriminación fonética.
+* Memory is better consolidated with repetition distributed over time.
 
-Investigación japonesa (2015) encontró mejoras significativas en percepción de fonemas tras entrenamiento con shadowing.
+* Spaced practice outperforms massed practice.
 
-Esto respalda el entrenamiento simultáneo de:
+* Active recall improves retention.
 
-Escucha + imitación + ritmo + entonación.
+This supports the use of:
 
----
+* Spaced Repetition Systems (SRS)
+* Review of actual sentences, not isolated lists
 
-## 7. Subtítulos y Procesamiento Dual
+But the evidence also shows:
 
-Estudios sobre subtitulado muestran:
+Memory is stronger when learning is contextual and meaningful.
 
-* Subtítulos en lengua nativa reducen procesamiento del idioma objetivo.
-* Subtítulos en lengua meta mejoran adquisición léxica y comprensión.
-
-Esto ocurre porque el cerebro tiende a elegir el camino de menor esfuerzo cognitivo.
-
-Si lee en su idioma, deja de procesar el idioma objetivo.
+That's why the method combines actual input + repetition.
 
 ---
 
-## 8. Filtro Afectivo (Emoción y Aprendizaje)
+## 5. Cognitive Processing: Focused vs. Diffuse Mode
 
-La ansiedad, vergüenza y miedo:
+Research in complex learning shows that the brain alternates between:
 
-* Reducen atención
-* Reducen memoria
-* Disminuyen adquisición
+Focused mode → conscious effort
+Diffuse mode → subconscious integration
 
-La motivación y disfrute:
+Consolidation occurs during:
 
-* Aumentan exposición
-* Mejoran retención
-* Sostienen consistencia
+* Rest
+* Relaxed activities
+* Sleep
 
-Por eso el método enfatiza contenido interesante y progreso sin humillación.
+This explains why:
 
----
-
-# Síntesis Teórica
-
-El aprendizaje eficiente de un idioma ocurre cuando:
-
-1. El cerebro recibe grandes cantidades de input comprensible.
-2. El lenguaje se procesa por significado, no por traducción.
-3. Se consolida mediante repetición espaciada.
-4. Se fortalece mediante producción gradual.
-5. Se entrena el oído con exposición real.
-6. El proceso es emocionalmente sostenible.
-
-Este no es un método basado en intuición.
-Es un sistema alineado con cómo aprende el cerebro humano.
+* It is not necessary to understand everything immediately
+* Large amounts of input generate subsequent insights
 
 ---
 
-# PARTE II
+## 6. Phonetic Perception and Shadowing
 
-# Flujo Step-by-Step del Aprendizaje
+Studies in applied phonology show that:
 
-Este es el modelo operativo que puedes usar en tu landing.
+* Perception precedes production.
 
----
+* Ear training improves pronunciation.
 
-# FASE 1 — Exposición Inteligente
+* Techniques such as shadowing improve phonetic discrimination.
 
-Objetivo: Construir comprensión.
+Japanese research (2015) found significant improvements in phoneme perception after shadowing training.
 
-Paso 1
-Consumir contenido comprensible (series, videos, lectura).
+This supports simultaneous training of:
 
-Reglas:
-
-* 70–90% entendible
-* Sin subtítulos en lengua nativa
-* Priorizar contexto
-
-Resultado:
-El cerebro comienza a detectar patrones.
+Listening + imitation + rhythm + intonation.
 
 ---
 
-# FASE 2 — Detección de Patrones
+## 7. Subtitles and Dual Processing
 
-Objetivo: Activar reconocimiento subconsciente.
+Studies on subtitling show:
 
-Paso 2
-Repetir exposición frecuente.
+* Subtitles in the native language reduce processing of the target language.
 
-* Mismo tipo de contenido
-* Mismos personajes
-* Mismos contextos
+* Subtitles in the target language improve lexical acquisition and comprehension.
 
-Resultado:
-El cerebro automatiza estructuras sin memorizarlas explícitamente.
+This occurs because the brain tends to choose the path of least cognitive effort.
+
+If you read in your native language, you stop processing the target language.
 
 ---
 
-# FASE 3 — Consolidación Léxica
+## 8. Affective Filter (Emotion and Learning)
 
-Objetivo: Fijar vocabulario de alta frecuencia.
+Anxiety, shame, and fear:
 
-Paso 3
-Extraer frases reales del contenido.
+* Reduce attention
+* Reduce memory
+* Decrease acquisition
 
-Paso 4
-Revisarlas con repetición espaciada.
+Motivation and enjoyment:
 
-Regla:
-Siempre frases completas, no palabras sueltas.
+* Increase exposure
+* Improve retention
+* Sustain consistency
 
-Resultado:
-Acceso más rápido al lenguaje en tiempo real.
-
----
-
-# FASE 4 — Entrenamiento Auditivo y Fonético
-
-Objetivo: Mejorar percepción y pronunciación.
-
-Paso 5
-Aplicar shadowing con fragmentos cortos.
-
-Proceso:
-
-* Escuchar
-* Repetir
-* Imitar ritmo
-* Ajustar entonación
-
-Resultado:
-Mejor comprensión en velocidad natural.
+That's why the method emphasizes interesting content and progress without humiliation.
 
 ---
 
-# FASE 5 — Producción Controlada
+# Theoretical Synthesis
 
-Objetivo: Automatizar uso.
+Efficient language learning occurs when:
 
-Paso 6
-Producción breve y enfocada.
+1. The brain receives large amounts of comprehensible input.
 
-* Resumir lo visto
-* Simular conversaciones
-* Escribir mensajes cortos
+2. Language is processed by meaning, not by translation.
 
-Resultado:
-El sistema interno comienza a operar activamente.
+3. It is consolidated through spaced repetition.
 
----
+4. It is strengthened through gradual production.
 
-# FASE 6 — Integración y Fluidez
+5. The ear is trained through real-world exposure.
 
-Objetivo: Naturalidad.
+6. The process is emotionally sustainable.
+This is not an intuitive method.
 
-Paso 7
-Aumentar dificultad progresivamente.
-
-* Menos subtítulos
-* Más velocidad
-* Conversaciones más largas
-
-Resultado:
-Fluidez funcional.
+It's a system aligned with how the human brain learns.
 
 ---
 
-# Resumen Visual del Flujo
+# PART II
 
-Input comprensible
+# Step-by-Step Learning Flow
+
+This is the operational model you can use on your landing page.
+
+---
+
+# PHASE 1 — Intelligent Exposure
+
+Objective: Build understanding.
+
+Step 1
+Consume understandable content (series, videos, reading).
+
+Rules:
+
+* 70–90% understandable
+* No subtitles in the native language
+* Prioritize context
+
+Result:
+The brain begins to detect patterns.
+
+---
+
+# PHASE 2 — Pattern Detection
+
+Objective: Activate subconscious recognition.
+
+Step 2
+Repeat frequent exposure.
+
+* Same type of content
+* Same characters
+* Same contexts
+
+Result:
+The brain automates structures without explicitly memorizing them.
+
+---
+
+# PHASE 3 — Lexical Consolidation
+
+Objective: To solidify high-frequency vocabulary.
+
+Step 3
+Extract real phrases from the content.
+
+Step 4
+Review them with spaced repetition.
+
+Rule:
+Always complete phrases, not isolated words.
+
+Result:
+Faster access to language in real time.
+
+--
+
+# PHASE 4 — Auditory and Phonetic Training
+
+Objective: To improve perception and pronunciation.
+
+Step 5
+Apply shadowing with short fragments.
+
+Process:
+
+* Listen
+* Repeat
+* Imitate rhythm
+* Adjust intonation
+
+Result:
+
+Improved comprehension at natural speed.
+
+--
+
+# PHASE 5 — Controlled Production
+
+Objective: To automate usage.
+
+Step 6
+Brief and focused production.
+
+* Summarize what you've seen
+* Simulate conversations
+* Write short messages
+
+Result:
+The internal system begins to operate actively.
+
+---
+
+# PHASE 6 — Integration and Fluency
+
+Objective: Naturalness.
+
+Step 7
+Gradually increase difficulty.
+
+* Fewer subtitles
+* More speed
+* Longer conversations
+
+Result: Functional fluency.
+
+---
+
+# Visual Flow Summary
+
+Understandable input
 ↓
-Reconocimiento de patrones
+Pattern recognition
 ↓
-Repetición espaciada
+Spaced repetition
 ↓
 Shadowing
 ↓
-Producción gradual
+Gradual production
 ↓
-Fluidez automática
+Automatic fluency
 
 ---

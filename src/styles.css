@@ -101,6 +101,13 @@ button:disabled {
   --shadow-card-dark: var(--shadow-card-dark);
 }
 
+/* Global request progress bar animation */
+@keyframes progress-indeterminate {
+  0% { transform: translateX(-100%) scaleX(0.3); }
+  50% { transform: translateX(0%) scaleX(0.7); }
+  100% { transform: translateX(100%) scaleX(0.3); }
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;

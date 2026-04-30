@@ -1,7 +1,6 @@
 import { create } from 'zustand'
 import { profileService } from '#/services/profile'
 import { plansService } from '#/services/plans'
-import { seedDefaultResources } from '#/services/resources'
 import type { StudyPlan, UserProfile } from '#/services/types'
 
 let _initPromise: Promise<void> | null = null
@@ -84,7 +83,6 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
           await plansService.ensureDefaultPlan()
           const plans = await plansService.list()
           const active = plans.find((plan) => plan.is_active) ?? plans[0]
-          if (active?.id) await seedDefaultResources(active.id)
           set({ ...profile, plans, activePlanId: active?.id, isInitialized: true })
         } catch {
           _initPromise = null

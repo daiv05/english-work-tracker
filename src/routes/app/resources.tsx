@@ -1,9 +1,10 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { Modal } from '#/components/ui/Modal'
 import { useToast } from '#/components/ui/ToastProvider'
 import { SearchSelect } from '#/components/ui/SearchSelect'
-import { categoriesService, resourcesService } from '#/services/resources'
+import { categoriesService, resourcesService, DEFAULT_SEED } from '#/services/resources'
+import { exportResources, importResources } from '#/services/importExport'
 import type { Resource, ResourceCategory } from '#/db/index'
 import { useResourceCategories, useResources } from '#/db/hooks'
 import { useProfileStore } from '#/store/profile'
@@ -272,6 +273,174 @@ function ResourceCard({
   )
 }
 
+function RecommendedModal({
+  open,
+  onClose,
+  planId,
+  existingResources,
+}: {
+  open: boolean
+  onClose: () => void
+  planId?: number
+  existingResources: Resource[]
+}) {
+  const toast = useToast()
+  const [adding, setAdding] = useState<string | null>(null)
+
+  function isAdded(url: string) {
+    return existingResources.some((r) => r.url === url)
+  }
+
+  async function addSingle(categoryName: string, res: { title: string; url: string; tags: string[] }) {
+    if (!planId) return
+    setAdding(res.url)
+    try {
+      let catId: number | undefined
+      const existingCats = await categoriesService.getAll(planId)
+      const existing = existingCats.find((c) => c.name === categoryName)
+      if (existing) {
+        catId = existing.id
+      } else {
+        catId = await categoriesService.create(planId, categoryName)
+      }
+      await resourcesService.create({
+        plan_id: planId,
+        category_id: catId!,
+        title: res.title,
+        url: res.url,
+        notes: '',
+        tags: res.tags,
+        created_at: Date.now(),
+      })
+      toast.success(`Added "${res.title}".`)
+    } catch {
+      toast.error('Could not add resource.')
+    } finally {
+      setAdding(null)
+    }
+  }
+
+  async function addAll() {
+    if (!planId) return
+    setAdding('__all__')
+    try {
+      const existingCats = await categoriesService.getAll(planId)
+      for (const section of DEFAULT_SEED) {
+        let catId: number | undefined
+        const existing = existingCats.find((c) => c.name === section.name)
+        if (existing) {
+          catId = existing.id
+        } else {
+          catId = await categoriesService.create(planId, section.name)
+          existingCats.push({ id: catId, name: section.name, plan_id: planId, created_at: Date.now() })
+        }
+        for (const res of section.resources) {
+          if (isAdded(res.url)) continue
+          await resourcesService.create({
+            plan_id: planId,
+            category_id: catId!,
+            title: res.title,
+            url: res.url,
+            notes: '',
+            tags: res.tags,
+            created_at: Date.now(),
+          })
+        }
+      }
+      toast.success('All recommended resources added.')
+      onClose()
+    } catch {
+      toast.error('Could not add all resources.')
+    } finally {
+      setAdding(null)
+    }
+  }
+
+  const totalNew = DEFAULT_SEED.reduce(
+    (sum, section) => sum + section.resources.filter((r) => !isAdded(r.url)).length,
+    0,
+  )
+
+  return (
+    <Modal open={open} onClose={onClose} title="Recommended Resources">
+      <div className="space-y-4">
+        <p className="text-sm text-on-surface-variant">
+          A curated starter list. Add resources individually or all at once — categories are created automatically.
+        </p>
+        <div className="max-h-[60vh] overflow-y-auto space-y-5 pr-1">
+          {DEFAULT_SEED.map((section) => (
+            <div key={section.name}>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-outline mb-2">
+                {section.name}
+              </p>
+              <div className="space-y-1.5">
+                {section.resources.map((res) => {
+                  const added = isAdded(res.url)
+                  const isLoading = adding === res.url
+                  return (
+                    <div
+                      key={res.url}
+                      className="flex items-center justify-between gap-3 px-3 py-2 rounded-xl border border-surface-high bg-white"
+                    >
+                      <div className="min-w-0">
+                        <p className={`text-sm font-semibold leading-tight truncate ${added ? 'text-outline line-through' : 'text-on-surface'}`}>
+                          {res.title}
+                        </p>
+                        <div className="flex flex-wrap gap-1 mt-0.5">
+                          {res.tags.map((t) => (
+                            <span key={t} className="text-[10px] text-outline font-medium bg-surface-low px-1.5 py-0.5 rounded-full">
+                              {t}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      {added ? (
+                        <span className="shrink-0 text-[11px] font-semibold text-emerald-600 flex items-center gap-1">
+                          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                          Added
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => void addSingle(section.name, res)}
+                          disabled={isLoading || adding === '__all__'}
+                          className="cursor-pointer shrink-0 px-2.5 py-1 rounded-lg bg-primary-dark/8 text-primary-dark text-[11px] font-semibold hover:bg-primary-dark/15 transition-colors disabled:opacity-50"
+                        >
+                          {isLoading ? '…' : '+ Add'}
+                        </button>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="flex gap-3 pt-1 border-t border-surface-high">
+          <button
+            type="button"
+            onClick={onClose}
+            className="cursor-pointer flex-1 py-2.5 rounded-lg border border-outline-variant text-sm font-semibold text-on-surface-variant hover:bg-surface-low transition-colors"
+          >
+            Close
+          </button>
+          {totalNew > 0 && (
+            <button
+              type="button"
+              onClick={() => void addAll()}
+              disabled={adding === '__all__'}
+              className="cursor-pointer flex-1 py-2.5 rounded-lg bg-primary-dark text-white text-sm font-semibold hover:bg-primary-dark-hover transition-colors disabled:opacity-50"
+            >
+              {adding === '__all__' ? 'Adding…' : `Add All (${totalNew})`}
+            </button>
+          )}
+        </div>
+      </div>
+    </Modal>
+  )
+}
+
 function AddResourceForm({
   planId,
   categories,
@@ -445,8 +614,37 @@ function ResourceLibrary() {
   const [showAddResource, setShowAddResource] = useState(false)
   const [showAddCategory, setShowAddCategory] = useState(false)
   const [newCatName, setNewCatName] = useState('')
+  const [showRecommended, setShowRecommended] = useState(false)
+  const [importing, setImporting] = useState(false)
+  const importInputRef = useRef<HTMLInputElement>(null)
   const categories = useResourceCategories()
   const allResources = useResources()
+
+  async function handleExport() {
+    if (!activePlanId) return
+    try {
+      await exportResources(activePlanId)
+      toast.success('Resources exported.')
+    } catch {
+      toast.error('Export failed.')
+    }
+  }
+
+  async function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || !activePlanId) return
+    setImporting(true)
+    try {
+      const text = await file.text()
+      await importResources(activePlanId, text)
+      toast.success('Resources imported.')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Import failed.')
+    } finally {
+      setImporting(false)
+      if (importInputRef.current) importInputRef.current.value = ''
+    }
+  }
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
@@ -513,7 +711,33 @@ function ResourceLibrary() {
             Your curated English learning links
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <button
+            onClick={handleExport}
+            className="cursor-pointer px-3 py-2 rounded-xl border border-outline-variant text-sm font-semibold text-on-surface-variant hover:bg-surface-low transition-colors flex items-center gap-1.5"
+          >
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Export
+          </button>
+          <button
+            onClick={() => importInputRef.current?.click()}
+            disabled={importing}
+            className="cursor-pointer px-3 py-2 rounded-xl border border-outline-variant text-sm font-semibold text-on-surface-variant hover:bg-surface-low transition-colors flex items-center gap-1.5 disabled:opacity-50"
+          >
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            {importing ? 'Importing…' : 'Import'}
+          </button>
+          <input
+            ref={importInputRef}
+            type="file"
+            accept=".json"
+            className="hidden"
+            onChange={handleImportFile}
+          />
           <button
             onClick={() => setShowAddCategory(true)}
             className="cursor-pointer px-3 py-2 rounded-xl border border-outline-variant text-sm font-semibold text-on-surface-variant hover:bg-surface-low transition-colors"
@@ -541,6 +765,19 @@ function ResourceLibrary() {
             Add Resource
           </button>
         </div>
+      </div>
+
+      {/* Recommended */}
+      <div className="mb-4">
+        <button
+          onClick={() => setShowRecommended(true)}
+          className="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-secondary/30 bg-secondary/5 text-secondary text-sm font-semibold hover:bg-secondary/10 transition-colors"
+        >
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+          </svg>
+          Recommended
+        </button>
       </div>
 
       {/* Search */}
@@ -695,6 +932,14 @@ function ResourceLibrary() {
           })}
         </div>
       )}
+
+      {/* Recommended Resources Modal */}
+      <RecommendedModal
+        open={showRecommended}
+        onClose={() => setShowRecommended(false)}
+        planId={activePlanId}
+        existingResources={allResources}
+      />
 
       {/* Add Resource Modal */}
       <Modal

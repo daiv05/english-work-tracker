@@ -2,110 +2,119 @@
 
 ## 1. Overview
 
-**Nombre:** English Work Tracker
-**Tipo:** Progressive Web App (PWA)
-**Stack:** React + IndexedDB (offline-first) + backend opcional (Supabase o API propia)
-**Distribución:** Empaquetado como PWA y publicación en Microsoft Store
+**Name:** English Work Tracker
+**Type:** Progressive Web App (PWA)
+**Stack:** React + IndexedDB (offline-first) + optional backend (Supabase or custom API)
+**Distribution:** Packaged as a PWA and published on the Microsoft Store
 
-Aplicación enfocada en hacer tracking estructurado del plan de estudio de inglés orientado al entorno laboral, con énfasis en:
+This application focuses on structured tracking of English study plans geared towards the workplace, with an emphasis on:
 
-- Consistencia diaria
-- Producción activa (writing + speaking)
-- Registro flexible por bloques durante el día
-- Centralización de recursos personalizados
-- Métricas reales de progreso
-
----
-
-# 2. Objetivos del Producto
-
-## 2.1 Objetivo Principal
-
-Permitir mantener una rutina sostenible de estudio laboral (1–2h diarias) sin fricción y con medición clara del progreso.
-
-## 2.2 Objetivos Secundarios
-
-- No asumir que el estudio ocurre en un solo bloque.
-- Permitir registrar múltiples sesiones en distintos momentos del día.
-- Centralizar enlaces de estudio por categoría.
-- Forzar producción escrita frecuente.
-- Visualizar progreso mensual y acumulado.
+- Daily consistency
+- Active production (writing + speaking)
+- Flexible recording by blocks throughout the day
+- Centralization of personalized resources
+- Real progress metrics
 
 ---
 
-# 3. Principios de Diseño
+# 2. Product Objectives
 
-1. **Flexible, no rígido:** El usuario puede estudiar en 2–4 bloques pequeños.
-2. **Output obligatorio:** Siempre habrá espacio para producir (escribir o hablar).
-3. **Registro simple:** Añadir actividad debe tomar <10 segundos.
-4. **Offline first:** Debe funcionar sin internet.
-5. **Medición acumulativa:** El progreso se mide por consistencia, no por intensidad aislada.
+## 2.1 Primary Objective
+
+To enable users to maintain a sustainable work study routine (1–2 hours daily) seamlessly and with clear progress measurement.
+
+## 2.2 Secondary Objectives
+
+- To avoid assuming that study occurs in a single block.
+
+- Allow recording multiple sessions at different times of the day.
+
+- Centralize study links by category.
+
+- Encourage frequent written output.
+
+--- View monthly and cumulative progress.
 
 ---
 
-# 4. Arquitectura
+# 3. Design Principles
+
+1. **Flexible, not rigid:** The user can study in 2–4 small blocks.
+
+2. **Mandatory output:** There will always be time to produce (write or speak).
+
+3. **Simple registration:** Adding activity should take <10 seconds.
+
+4. **Offline first:** It should work without internet access.
+
+5. **Cumulative measurement:** Progress is measured by consistency, not by isolated bursts of intensity.
+
+---
+
+# 4. Architecture
 
 ## 4.1 Frontend
 
 - React (Vite)
 - React Router
-- Zustand o Context API
-- IndexedDB (Dexie recomendado)
+- Zustand or Context API
+- IndexedDB (Dexie recommended)
 - Service Worker
 - Web App Manifest
 
-## 4.2 Backend (Opcional V2)
+## 4.2 Backend (Optional V2)
 
-- Supabase o API REST
-- Sincronización opcional
-- Backup en la nube
+- Supabase or REST API
+- Optional Synchronization
+- Cloud Backup
 
 ---
 
-# 5. Estructura de Módulos
+# 5. Module Structure
 
 ## 5.1 Dashboard
 
-Muestra:
+Displays:
 
-- Tiempo acumulado hoy
-- Número de bloques registrados hoy
-- Racha actual
-- Progreso semanal (% meta alcanzada)
-- Botón: “Registrar actividad”
-- Botón: “Modo escritura”
-
----
-
-## 5.2 Registro Diario Flexible (Core Feature)
-
-### Concepto Clave
-
-Un día no es una sola sesión.
-Un día contiene múltiples **bloques de actividad**.
-
-Ejemplo real:
-
-- 7:30am → 20 min podcast
-- 12:30pm → 15 min lectura
-- 8:00pm → 30 min writing
-
-Todos pertenecen al mismo día.
+- Total time today
+- Number of blocks logged today
+- Current streak
+- Weekly progress (% of goal achieved)
+- Button: "Log Activity"
+- Button: "Write Mode"
 
 ---
 
-## 5.3 Modelo de Registro por Bloque
+## 5.2 Flexible Daily Log (Core Feature)
 
-Cada bloque contiene:
+### Key Concept
 
-- Fecha
-- Hora inicio (opcional)
-- Tipo de actividad
-- Recurso utilizado (seleccionado o personalizado)
-- Descripción libre (qué hiciste exactamente)
-- Tiempo en minutos
+A day is not a single session.
 
-Tipos de actividad:
+A day contains multiple **activity blocks**.
+
+Real Example:
+
+- 7:30 a.m. → 20 min podcast
+- 12:30 p.m. → 15 min reading
+- 8:00 p.m. → 30 min writing
+
+All belong to the same day.
+
+--
+
+## 5.3 Block Log Model
+
+Each block contains:
+
+- Date
+- Start time (optional)
+- Activity type
+- Resource used (selected or customized)
+- Free-form description (what you did exactly)
+- Time in minutes
+
+Activity types:
 
 - Listening
 - Reading
@@ -117,186 +126,186 @@ Tipos de actividad:
 
 ---
 
-# 6. Sistema de Contenido Recomendado (Actualizado)
+# 6. Recommended Content System (Updated)
 
-## 6.1 Objetivo
+## 6.1 Objective
 
-Centralizar todos los enlaces útiles por categoría para tenerlos “a la mano” al momento de registrar actividad.
+To centralize all useful links by category so they are readily available when logging activity.
 
 ---
 
-## 6.2 Categorías Configurables
+## 6.2 Configurable Categories
 
-El usuario puede crear y gestionar categorías como:
+The user can create and manage categories such as:
 
-- Series laborales
+- Work Series
 - Podcasts
-- YouTube técnico
-- Artículos
-- Documentación técnica
-- Reuniones reales
-- Emails reales
-- Recursos personalizados
+- Technical YouTube Videos
+- Articles
+- Technical Documentation
+- Actual Meetings
+- Actual Emails
+- Custom Resources
 
 ---
 
-## 6.3 Enlaces por Categoría
+## 6.3 Links per Category
 
-Cada categoría permite:
+Each category allows:
 
-- Agregar múltiples enlaces
-- Título personalizado
+- Adding multiple links
+- Custom title
 - URL
-- Notas opcionales
-- Etiquetas (ej: technical, casual, advanced)
+- Optional notes
+- Tags (e.g., technical, casual, advanced)
 
-Ejemplo estructura:
+Example structure:
 
 ```json
 {
-  id,
-  category_id,
-  title,
-  url,
-  notes,
-  tags[]
+id,
+category_id,
+title,
+url,
+notes,
+tags[]
 }
 ```
 
 ---
 
-## 6.4 Uso en Registro Diario
+## 6.4 Use in Daily Log
 
-Al registrar una actividad:
+When logging an activity:
 
-1. Selecciona tipo (Listening, Reading, etc.)
-2. Puede:
-   - Elegir un recurso existente (dropdown filtrado por categoría)
-   - O escribir manualmente qué utilizó
+1. Select type (Listening, Reading, etc.)
+2. You can:
 
-3. Indica duración
-4. Agrega nota breve (ej: “Shadowing 5 min del minuto 03:00 al 08:00”)
+- Choose an existing resource (dropdown filtered by category)
+- Or manually enter what you used
 
-Esto permite trazabilidad real de progreso.
+3. Indicate duration
+4. Add a brief note (e.g., "Shadowing") 5 minutes from 03:00 to 08:00
 
----
-
-# 7. Daily Writing Mode (Feature Principal)
-
-## 7.1 Objetivo
-
-Forzar producción escrita frecuente orientada al entorno profesional.
+This allows for real-time progress tracking.
 
 ---
 
-## 7.2 Características
+# 7. Daily Writing Mode (Main Feature)
 
-- Editor minimalista
-- Guardado automático
-- Contador de palabras
-- Tiempo activo de escritura
-- Historial por fecha
-- Posibilidad de múltiples escritos en un mismo día
+## 7.1 Objective
+
+To encourage frequent written output geared towards a professional environment.
 
 ---
 
-## 7.3 Prompts Sugeridos
+## 7.2 Features
 
-Generados automáticamente o seleccionables:
-
-- Escribe un email explicando un bug.
-- Resume tu día laboral.
-- Explica un feature técnico.
-- Simula una reunión.
-- Describe una mejora en un sistema.
-
-También puede escribir sin prompt.
+- Minimalist editor
+- Automatic saving
+- Word counter
+- Active writing time
+- History by date
+- Ability to write multiple times in a single day
 
 ---
 
-## 7.4 Métricas de Escritura
+## 7.3 Suggested Prompts
 
-- Total palabras acumuladas
-- Palabras por mes
-- Días consecutivos escribiendo
-- Promedio palabras por sesión
-- Total minutos escribiendo
+Automatically generated or selectable:
+
+- Write an email explaining a bug.
+- Summarize your workday.
+- Explain a technical feature.
+- Simulate a meeting.
+- Describe a system improvement.
+
+You can also write without a prompt.
 
 ---
 
-# 8. Métricas Globales
+## 7.4 Writing Metrics
 
-## 8.1 Diarias
+- Total words accumulated
+- Words per month
+- Consecutive days writing
+- Average words per session
+- Total minutes writing
 
-- Minutos totales
-- Bloques registrados
-- Tipos de actividad realizados
+---
 
-## 8.2 Semanales
+# 8. Global Metrics
 
-- Total minutos
-- % meta alcanzada
-- Actividad más frecuente
+## 8.1 Daily
+
+- Total minutes
+- Blocks recorded
+- Types of activity performed
+
+## 8.2 Weekly
+
+- Total minutes
+- % of goal achieved
+- Most frequent activity
 - Writing consistency
 
-## 8.3 Mensuales
+## 8.3 Monthly
 
-- Total horas
-- Total palabras escritas
-- Autoevaluación estructurada
-- Gráfico tipo heatmap
-
----
-
-# 9. Sistema de Rachas
-
-Reglas:
-
-- Día válido = ≥30 minutos acumulados
-- Día completo = ≥60 minutos
-- La racha depende de días válidos consecutivos
-
-La racha no depende de hacer todo en una sola sesión.
+- Total hours
+- Total words written
+- Structured self-assessment
+- Heatmap chart
 
 ---
 
-# 10. UX Flow Diario
+# 9. Streak System
 
-### Escenario A — Registro rápido
+Rules:
 
-1. Abrir app
-2. Click “Registrar actividad”
-3. Seleccionar tipo
-4. Seleccionar recurso o escribir uno nuevo
-5. Ingresar minutos
-6. Guardar
+- Valid day = ≥30 minutes accumulated
+- Full day = ≥60 minutes
+- Streak depends on consecutive valid days
 
-Duración del flujo: <10 segundos.
+Strike does not depend on doing everything in a single session.
+---
+
+# 10. Daily UX Flow
+
+### Scenario A — Quick Log
+
+1. Open app
+2. Click "Log activity"
+3. Select type
+4. Select resource or enter a new one
+5. Enter minutes
+6. Save
+
+Flow duration: <10 seconds.
 
 ---
 
-### Escenario B — Modo escritura
+### Scenario B — Writing Mode
 
-1. Click “Modo escritura”
-2. Seleccionar prompt o libre
-3. Escribir
-4. Guardado automático
-5. Se registra automáticamente como bloque Writing
-
----
-
-### Escenario C — Vista del Día
-
-Muestra:
-
-- Lista cronológica de bloques
-- Total acumulado
-- Posibilidad de editar/eliminar bloque
-- Resumen visual por tipo
+1. Click "Writing Mode"
+2. Select prompt or free input
+3. Write
+4. Auto-save
+5. Automatically saved as a Writing block
 
 ---
 
-# 11. Modelo de Datos Final
+### Scenario C — Day View
+
+Displays:
+
+- Chronological list of blocks
+- Cumulative total
+- Ability to edit/delete blocks
+- Visual summary by type
+
+---
+
+# 11. Final Data Model
 
 ## users
 
@@ -347,10 +356,10 @@ Muestra:
 
 # 12. Offline Strategy
 
-- IndexedDB como fuente primaria
-- Sincronización diferida opcional
+- IndexedDB as primary source
+- Optional deferred synchronization
 - Service worker cache-first
-- Exportación manual JSON como backup
+- Manual JSON export as backup
 
 ---
 
@@ -359,57 +368,57 @@ Muestra:
 ## MVP
 
 - Dashboard
-- Registro por bloques
-- Categorías + enlaces personalizados
-- Writing mode básico
-- Racha
-- Offline completo
+- Block registration
+- Categories + custom links
+- Basic writing mode
+- Streak
+- Full offline
 
 ## V2
 
-- Estadísticas avanzadas
-- Exportar CSV
-- Sincronización en la nube
-- Feedback automático en escritura
+- Advanced statistics
+- CSV export
+- Cloud synchronization
+- Automatic writing feedback
 
 ## V3
 
-- Análisis de evolución lingüística
-- Recomendación inteligente de enfoque
-- Métricas predictivas
+- Language evolution analysis
+- Intelligent focus recommendation
+- Predictive metrics
 
 ---
 
-# 14. Publicación como PWA
+# 14. Publishing as PWA
 
-Pasos:
+Steps:
 
-1. Manifest.json completo
-2. Service worker estable
-3. Soporte offline real
-4. Empaquetar con PWABuilder
-5. Publicar en Microsoft Store
+1. Complete Manifest.json
+2. Stable service worker
+3. Real offline support
+4. Package with PWABuilder
+5. Publish on the Microsoft Store
 
-Requisitos:
+Requirements:
 
-- Iconos adaptativos
-- Política de privacidad
-- Versionado semántico
-- Testing en Windows
+- Responsive icons
+- Privacy policy
+- Semantic versioning
+- Windows testing
 
 ---
 
-# 15. Diferenciador
+# 15. Differentiator
 
-No es una app genérica de inglés.
+It's not a generic English app.
 
-Es:
+It is:
 
-- Orientada a uso profesional real
-- Flexible por bloques diarios
-- Con centralización de recursos
-- Con escritura estructurada
-- Medible y acumulativa
-- Diseñada para consistencia a largo plazo
+- Geared towards real professional use
+- Flexible with daily blocks
+- With centralized resources
+- With structured writing
+- Measurable and cumulative
+- Designed for long-term consistency
 
 ---

@@ -1,6 +1,7 @@
-import { useMemo } from 'react'
+import { useMemo, useState, useCallback, useEffect } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { ProgressBar } from '#/components/ui/ProgressBar'
+import { Modal } from '#/components/ui/Modal'
 import { typeConfig } from '#/components/ui/ActivityTypeChip'
 import {
   useTodayStats,
@@ -12,8 +13,18 @@ import {
 } from '#/db/hooks'
 import { useProfileStore } from '#/store/profile'
 import { todayStr } from '#/lib/streak'
+import { activityTipsService } from '#/services/admin'
+import type { ActivityTipItem } from '#/services/admin'
 import type { WeeklyPlanTemplate, PlanTemplateBlock } from '#/services/types'
-import type { DailyBlock } from '#/db/index'
+import type { DailyBlock, Resource } from '#/db/index'
+
+function useActivityTips(): ActivityTipItem[] {
+  const [tips, setTips] = useState<ActivityTipItem[]>([])
+  useEffect(() => {
+    activityTipsService.getAll().then(setTips).catch(() => {/* non-critical */})
+  }, [])
+  return tips
+}
 
 export const Route = createFileRoute('/app/')({
   component: Dashboard,
@@ -21,15 +32,152 @@ export const Route = createFileRoute('/app/')({
 
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
+function getRecommendedResources(activityType: string, resources: Resource[]): Resource[] {
+  const tag = activityType.toLowerCase()
+  const matched = resources.filter((r) => r.tags.some((t) => t.toLowerCase() === tag))
+  return matched.length > 0 ? matched : resources.slice(0, 3)
+}
+
+function PlanItemModal({
+  item,
+  resources,
+  activityTips,
+  onClose,
+}: {
+  item: PlanTemplateBlock | null
+  resources: Resource[]
+  activityTips: ActivityTipItem[]
+  onClose: () => void
+}) {
+  if (!item) return null
+  const cfg = typeConfig[item.block] ?? typeConfig.Other
+  const tips = activityTips.find((t) => t.activity_type === item.block)
+    ?? activityTips.find((t) => t.activity_type === 'Other')
+    ?? null
+  const recommended = getRecommendedResources(item.block, resources)
+
+  return (
+    <Modal
+      open
+      onClose={onClose}
+      title={item.label || item.block}
+    >
+      {/* Activity header */}
+      <div className="flex items-center gap-3 mb-5">
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${cfg.bg}`}>
+          <span className={`w-3 h-3 rounded-full ${cfg.dot}`} />
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-on-surface">{item.block}</p>
+          <p className="text-xs text-outline">{item.minutes} min planned</p>
+        </div>
+      </div>
+
+      {/* How to do it */}
+      {tips && (
+        <section className="mb-5">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-outline mb-2">
+            How to approach this
+          </p>
+          <p className="text-sm text-on-surface-variant leading-relaxed">{tips.how}</p>
+        </section>
+      )}
+
+      {/* Tips */}
+      {tips && tips.tips.length > 0 && (
+        <section className="mb-5">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-outline mb-2">
+            Tips
+          </p>
+          <ul className="space-y-2">
+            {tips.tips.map((tip, i) => (
+              <li key={i} className="flex gap-2 text-sm text-on-surface-variant">
+                <span className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 ${cfg.dot}`} />
+                {tip}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* Recommended resources */}
+      {recommended.length > 0 && (
+        <section>
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-outline mb-2">
+            Recommended resources
+          </p>
+          <ul className="space-y-2">
+            {recommended.map((r) => (
+              <li
+                key={r.id}
+                className="flex items-start gap-2.5 rounded-xl border border-surface-high bg-surface-low px-3 py-2.5"
+              >
+                <div className="w-7 h-7 rounded-lg bg-white border border-surface-high flex items-center justify-center shrink-0 mt-0.5">
+                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  {r.url ? (
+                    <a
+                      href={r.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-medium text-tertiary hover:underline truncate block"
+                    >
+                      {r.title}
+                    </a>
+                  ) : (
+                    <p className="text-sm font-medium text-on-surface truncate">{r.title}</p>
+                  )}
+                  {r.notes && (
+                    <p className="text-xs text-outline mt-0.5 line-clamp-2">{r.notes}</p>
+                  )}
+                  {r.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {r.tags.slice(0, 4).map((tag) => (
+                        <span
+                          key={tag}
+                          className="text-[10px] px-1.5 py-0.5 rounded-full bg-surface-high text-outline font-medium"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+          <Link
+            to="/app/resources"
+            className="mt-3 block text-center text-xs text-tertiary font-semibold hover:underline"
+            onClick={onClose}
+          >
+            View all resources →
+          </Link>
+        </section>
+      )}
+    </Modal>
+  )
+}
+
 function TodaysPlanCard({
   activePlanTemplate,
   dayName,
   blocks,
+  resources,
+  activityTips,
 }: {
   activePlanTemplate: WeeklyPlanTemplate | null
   dayName: string
   blocks: DailyBlock[]
+  resources: Resource[]
+  activityTips: ActivityTipItem[]
 }) {
+  const [selectedItem, setSelectedItem] = useState<PlanTemplateBlock | null>(null)
+  const handleClose = useCallback(() => setSelectedItem(null), [])
+
   const plannedBlocks: PlanTemplateBlock[] = activePlanTemplate?.[dayName] ?? []
 
   // Sum logged minutes per activity type
@@ -48,84 +196,92 @@ function TodaysPlanCard({
   const dayLabel = dayName.charAt(0).toUpperCase() + dayName.slice(1)
 
   return (
-    <div className="md:col-span-12 bg-white border border-outline-variant rounded-2xl p-6 shadow-card">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-outline mb-1">
-            Today's Plan
-          </p>
-          <span className="inline-block text-xs font-semibold bg-secondary/10 text-secondary px-2 py-0.5 rounded-full">
-            {dayLabel}
-          </span>
+    <>
+      <PlanItemModal item={selectedItem} resources={resources} activityTips={activityTips} onClose={handleClose} />
+
+      <div className="md:col-span-12 bg-white border border-outline-variant rounded-2xl p-6 shadow-card">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-outline mb-1">
+              Today's Plan
+            </p>
+            <span className="inline-block text-xs font-semibold bg-secondary/10 text-secondary px-2 py-0.5 rounded-full">
+              {dayLabel}
+            </span>
+          </div>
+          {totalPlanned > 0 && (
+            <p className="text-xs text-outline">
+              <span className="font-semibold text-on-surface">{totalLogged}</span>
+              {' / '}{totalPlanned} min
+              {' · '}
+              <span className="font-semibold text-on-surface">{blocksDone}</span>
+              /{plannedBlocks.length} blocks done
+            </p>
+          )}
         </div>
-        {totalPlanned > 0 && (
-          <p className="text-xs text-outline">
-            <span className="font-semibold text-on-surface">{totalLogged}</span>
-            {' / '}{totalPlanned} min
-            {' · '}
-            <span className="font-semibold text-on-surface">{blocksDone}</span>
-            /{plannedBlocks.length} blocks done
+
+        {plannedBlocks.length === 0 ? (
+          <p className="text-sm text-outline text-center py-4">
+            No plan template for {dayLabel}. You can set one in the{' '}
+            <Link to="/app/plan" className="text-tertiary font-semibold hover:underline">
+              Plan Builder
+            </Link>
+            .
           </p>
+        ) : (
+          <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            {plannedBlocks.map((b, i) => {
+              const logged = loggedByType[b.block] ?? 0
+              const done = logged >= b.minutes
+              const pct = Math.min(100, b.minutes > 0 ? (logged / b.minutes) * 100 : 0)
+              const cfg = typeConfig[b.block] ?? typeConfig.Other
+              return (
+                <li
+                  key={i}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setSelectedItem(b)}
+                  onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setSelectedItem(b)}
+                  className={`flex items-center gap-3 rounded-xl px-3 py-2.5 border transition-colors cursor-pointer hover:border-outline-variant hover:shadow-sm ${
+                    done
+                      ? 'bg-secondary/5 border-secondary/20'
+                      : 'bg-surface-low border-transparent'
+                  }`}
+                >
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${cfg.bg}`}>
+                    <span className={`w-2.5 h-2.5 rounded-full ${cfg.dot}`} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-1 mb-1">
+                      <span className="text-xs font-semibold text-on-surface truncate">
+                        {b.label || b.block}
+                      </span>
+                      {done ? (
+                        <span className="text-secondary shrink-0">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-outline whitespace-nowrap shrink-0">
+                          {logged > 0 ? `${logged}/` : ''}{b.minutes}m
+                        </span>
+                      )}
+                    </div>
+                    <div className="w-full h-1 rounded-full bg-surface-high overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${done ? 'bg-secondary' : 'bg-secondary/40'}`}
+                        style={{ width: `${Math.max(pct, logged > 0 ? 6 : 0)}%` }}
+                      />
+                    </div>
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
         )}
       </div>
-
-      {plannedBlocks.length === 0 ? (
-        <p className="text-sm text-outline text-center py-4">
-          No plan template for {dayLabel}. You can set one in the{' '}
-          <Link to="/app/plan" className="text-tertiary font-semibold hover:underline">
-            Plan Builder
-          </Link>
-          .
-        </p>
-      ) : (
-        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-          {plannedBlocks.map((b, i) => {
-            const logged = loggedByType[b.block] ?? 0
-            const done = logged >= b.minutes
-            const pct = Math.min(100, b.minutes > 0 ? (logged / b.minutes) * 100 : 0)
-            const cfg = typeConfig[b.block] ?? typeConfig.Other
-            return (
-              <li
-                key={i}
-                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 border transition-colors ${
-                  done
-                    ? 'bg-secondary/5 border-secondary/20'
-                    : 'bg-surface-low border-transparent'
-                }`}
-              >
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${cfg.bg}`}>
-                  <span className={`w-2.5 h-2.5 rounded-full ${cfg.dot}`} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-1 mb-1">
-                    <span className="text-xs font-semibold text-on-surface truncate">
-                      {b.label || b.block}
-                    </span>
-                    {done ? (
-                      <span className="text-secondary shrink-0">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                      </span>
-                    ) : (
-                      <span className="text-[10px] text-outline whitespace-nowrap shrink-0">
-                        {logged > 0 ? `${logged}/` : ''}{b.minutes}m
-                      </span>
-                    )}
-                  </div>
-                  <div className="w-full h-1 rounded-full bg-surface-high overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all duration-500 ${done ? 'bg-secondary' : 'bg-secondary/40'}`}
-                      style={{ width: `${Math.max(pct, logged > 0 ? 6 : 0)}%` }}
-                    />
-                  </div>
-                </div>
-              </li>
-            )
-          })}
-        </ul>
-      )}
-    </div>
+    </>
   )
 }
 
@@ -190,6 +346,7 @@ function Dashboard() {
   const blocks = useBlocksForDate(today)
   const writingToday = useWritingEntriesForDate(today)
   const resources = useResources()
+  const activityTips = useActivityTips()
   const { username, plans, activePlanId } = useProfileStore()
   const activePlan = plans.find((plan) => plan.id === activePlanId)
 
@@ -300,14 +457,16 @@ function Dashboard() {
 
       {/* Bento grid */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-        {/* Today's Plan — full row */}
+        {/* Today's Plan - full row */}
         <TodaysPlanCard
           activePlanTemplate={activePlanTemplate}
           dayName={todayDayName}
           blocks={blocks}
+          resources={resources}
+          activityTips={activityTips}
         />
 
-        {/* Today's Progress — spans 8 cols */}
+        {/* Today's Progress - spans 8 cols */}
         <div className="md:col-span-8 bg-white border border-outline-variant rounded-2xl p-6 shadow-card">
           <div className="flex items-start justify-between mb-5">
             <div>
@@ -399,7 +558,7 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* Streak card — spans 4 cols */}
+        {/* Streak card - spans 4 cols */}
         <div className="md:col-span-4 bg-primary-dark text-white rounded-2xl p-6 shadow-card-dark flex flex-col justify-between">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-widest text-white/40 mb-3">
@@ -427,7 +586,7 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* Weekly Overview — spans 5 cols */}
+        {/* Weekly Overview - spans 5 cols */}
         <div className="md:col-span-5 bg-white border border-outline-variant rounded-2xl p-6 shadow-card">
           <p className="text-[11px] font-semibold uppercase tracking-widest text-outline mb-4">
             Weekly Overview
@@ -459,7 +618,7 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* Today's Activity — spans 7 cols */}
+        {/* Today's Activity - spans 7 cols */}
         <div className="md:col-span-7 bg-white border border-outline-variant rounded-2xl p-6 shadow-card">
           <div className="flex items-center justify-between mb-4">
             <p className="text-[11px] font-semibold uppercase tracking-widest text-outline">
@@ -495,7 +654,7 @@ function Dashboard() {
                 No activity yet today
               </p>
               <p className="text-xs text-outline mt-1 mb-3">
-                Start with a quick block — takes 10 seconds
+                Start with a quick block - takes 10 seconds
               </p>
               <Link
                 to="/app/log"

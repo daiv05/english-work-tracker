@@ -21,6 +21,7 @@ import { Route as AppWritingRouteImport } from './routes/app/writing'
 import { Route as AppResourcesRouteImport } from './routes/app/resources'
 import { Route as AppPlanRouteImport } from './routes/app/plan'
 import { Route as AppLogRouteImport } from './routes/app/log'
+import { Route as AppAdminRouteImport } from './routes/app/admin'
 
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
@@ -82,11 +83,17 @@ const AppLogRoute = AppLogRouteImport.update({
   path: '/log',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAdminRoute = AppAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/privacy': typeof PrivacyRoute
+  '/app/admin': typeof AppAdminRoute
   '/app/log': typeof AppLogRoute
   '/app/plan': typeof AppPlanRoute
   '/app/resources': typeof AppResourcesRoute
@@ -100,6 +107,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
+  '/app/admin': typeof AppAdminRoute
   '/app/log': typeof AppLogRoute
   '/app/plan': typeof AppPlanRoute
   '/app/resources': typeof AppResourcesRoute
@@ -115,6 +123,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/privacy': typeof PrivacyRoute
+  '/app/admin': typeof AppAdminRoute
   '/app/log': typeof AppLogRoute
   '/app/plan': typeof AppPlanRoute
   '/app/resources': typeof AppResourcesRoute
@@ -131,6 +140,7 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/privacy'
+    | '/app/admin'
     | '/app/log'
     | '/app/plan'
     | '/app/resources'
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/privacy'
+    | '/app/admin'
     | '/app/log'
     | '/app/plan'
     | '/app/resources'
@@ -158,6 +169,7 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/privacy'
+    | '/app/admin'
     | '/app/log'
     | '/app/plan'
     | '/app/resources'
@@ -265,10 +277,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppLogRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/admin': {
+      id: '/app/admin'
+      path: '/admin'
+      fullPath: '/app/admin'
+      preLoaderRoute: typeof AppAdminRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
+  AppAdminRoute: typeof AppAdminRoute
   AppLogRoute: typeof AppLogRoute
   AppPlanRoute: typeof AppPlanRoute
   AppResourcesRoute: typeof AppResourcesRoute
@@ -277,6 +297,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAdminRoute: AppAdminRoute,
   AppLogRoute: AppLogRoute,
   AppPlanRoute: AppPlanRoute,
   AppResourcesRoute: AppResourcesRoute,

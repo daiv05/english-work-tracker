@@ -8,6 +8,7 @@ interface UserInfo {
   email: string
   display_name: string
   avatar_data: string | null
+  is_superadmin: boolean
 }
 
 interface AuthTokenResponse {

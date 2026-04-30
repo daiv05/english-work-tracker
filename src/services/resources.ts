@@ -134,6 +134,57 @@ export const resourcesService = {
   },
 }
 
+export interface DefaultResourceItem {
+  id: number
+  category_name: string
+  title: string
+  url: string | null
+  tags: string[]
+  sort_order: number
+}
+
+interface DefaultResourceCreateBody {
+  category_name: string
+  title: string
+  url: string | null
+  tags: string[]
+  sort_order: number
+}
+
+interface DefaultResourceUpdateBody {
+  category_name?: string
+  title?: string
+  url?: string | null
+  tags?: string[]
+  sort_order?: number
+}
+
+export const defaultResourcesService = {
+  async getAll(): Promise<DefaultResourceItem[]> {
+    return apiFetch<DefaultResourceItem[]>('/superadmin/default-resources', { token: token() })
+  },
+
+  async create(body: DefaultResourceCreateBody): Promise<DefaultResourceItem> {
+    return apiFetch<DefaultResourceItem>('/superadmin/default-resources', {
+      method: 'POST',
+      token: token(),
+      body: JSON.stringify(body),
+    })
+  },
+
+  async update(id: number, body: DefaultResourceUpdateBody): Promise<DefaultResourceItem> {
+    return apiFetch<DefaultResourceItem>(`/superadmin/default-resources/${id}`, {
+      method: 'PUT',
+      token: token(),
+      body: JSON.stringify(body),
+    })
+  },
+
+  async delete(id: number): Promise<void> {
+    await apiFetch(`/superadmin/default-resources/${id}`, { method: 'DELETE', token: token() })
+  },
+}
+
 export async function seedDefaultResources(planId: number): Promise<void> {
   const existing = await categoriesService.getAll(planId)
   if (existing.length > 0) return

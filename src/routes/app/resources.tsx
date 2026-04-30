@@ -1,9 +1,10 @@
-import { useState, useMemo, useRef } from 'react'
+import { useState, useMemo, useRef, useEffect } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { Modal } from '#/components/ui/Modal'
 import { useToast } from '#/components/ui/ToastProvider'
 import { SearchSelect } from '#/components/ui/SearchSelect'
-import { categoriesService, resourcesService, DEFAULT_SEED } from '#/services/resources'
+import { categoriesService, resourcesService, defaultResourcesService, DEFAULT_SEED  } from '#/services/resources'
+import type {DefaultResourceItem} from '#/services/resources';
 import { exportResources, importResources } from '#/services/importExport'
 import type { Resource, ResourceCategory } from '#/db/index'
 import { useResourceCategories, useResources } from '#/db/hooks'
@@ -278,14 +279,31 @@ function RecommendedModal({
   onClose,
   planId,
   existingResources,
+  defaultResources,
 }: {
   open: boolean
   onClose: () => void
   planId?: number
   existingResources: Resource[]
+  defaultResources: DefaultResourceItem[]
 }) {
   const toast = useToast()
   const [adding, setAdding] = useState<string | null>(null)
+
+  // Group API resources by category; fall back to DEFAULT_SEED if empty
+  const sections: Array<{ name: string; resources: Array<{ title: string; url: string; tags: string[] }> }> =
+    defaultResources.length > 0
+      ? Object.entries(
+          defaultResources.reduce<Record<string, DefaultResourceItem[]>>((acc, item) => {
+            if (!acc[item.category_name]) acc[item.category_name] = []
+            acc[item.category_name].push(item)
+            return acc
+          }, {}),
+        ).map(([name, items]) => ({
+          name,
+          resources: items.map((i) => ({ title: i.title, url: i.url ?? '', tags: i.tags })),
+        }))
+      : DEFAULT_SEED
 
   function isAdded(url: string) {
     return existingResources.some((r) => r.url === url)
@@ -325,7 +343,7 @@ function RecommendedModal({
     setAdding('__all__')
     try {
       const existingCats = await categoriesService.getAll(planId)
-      for (const section of DEFAULT_SEED) {
+      for (const section of sections) {
         let catId: number | undefined
         const existing = existingCats.find((c) => c.name === section.name)
         if (existing) {
@@ -335,7 +353,7 @@ function RecommendedModal({
           existingCats.push({ id: catId, name: section.name, plan_id: planId, created_at: Date.now() })
         }
         for (const res of section.resources) {
-          if (isAdded(res.url)) continue
+          if (!res.url || isAdded(res.url)) continue
           await resourcesService.create({
             plan_id: planId,
             category_id: catId!,
@@ -356,8 +374,8 @@ function RecommendedModal({
     }
   }
 
-  const totalNew = DEFAULT_SEED.reduce(
-    (sum, section) => sum + section.resources.filter((r) => !isAdded(r.url)).length,
+  const totalNew = sections.reduce(
+    (sum, section) => sum + section.resources.filter((r) => r.url && !isAdded(r.url)).length,
     0,
   )
 
@@ -368,18 +386,18 @@ function RecommendedModal({
           A curated starter list. Add resources individually or all at once — categories are created automatically.
         </p>
         <div className="max-h-[60vh] overflow-y-auto space-y-5 pr-1">
-          {DEFAULT_SEED.map((section) => (
+          {sections.map((section) => (
             <div key={section.name}>
               <p className="text-[11px] font-bold uppercase tracking-widest text-outline mb-2">
                 {section.name}
               </p>
               <div className="space-y-1.5">
                 {section.resources.map((res) => {
-                  const added = isAdded(res.url)
+                  const added = res.url ? isAdded(res.url) : false
                   const isLoading = adding === res.url
                   return (
                     <div
-                      key={res.url}
+                      key={res.url || res.title}
                       className="flex items-center justify-between gap-3 px-3 py-2 rounded-xl border border-surface-high bg-white"
                     >
                       <div className="min-w-0">
@@ -616,9 +634,18 @@ function ResourceLibrary() {
   const [newCatName, setNewCatName] = useState('')
   const [showRecommended, setShowRecommended] = useState(false)
   const [importing, setImporting] = useState(false)
+  const [apiDefaultResources, setApiDefaultResources] = useState<DefaultResourceItem[]>([])
   const importInputRef = useRef<HTMLInputElement>(null)
   const categories = useResourceCategories()
   const allResources = useResources()
+
+  useEffect(() => {
+    void defaultResourcesService.getAll()
+      .then(setApiDefaultResources)
+      .catch(() => {
+        // Silently fall back to DEFAULT_SEED if fetch fails
+      })
+  }, [])
 
   async function handleExport() {
     if (!activePlanId) return
@@ -939,6 +966,7 @@ function ResourceLibrary() {
         onClose={() => setShowRecommended(false)}
         planId={activePlanId}
         existingResources={allResources}
+        defaultResources={apiDefaultResources}
       />
 
       {/* Add Resource Modal */}

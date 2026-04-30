@@ -137,5 +137,5 @@ export function importPlanTemplate(jsonString: string): WeeklyPlanTemplate | nul
   )
   if (!hasValidDay) return null
 
-  return template as WeeklyPlanTemplate
+  return template
 }

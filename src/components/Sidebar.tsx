@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useRouterState } from '@tanstack/react-router'
 import { useProfileStore } from '#/store/profile'
+import { useAuthStore } from '#/store/auth'
 import { ProfileModal } from './ProfileModal'
 import { Select } from './ui/Select'
 
@@ -142,6 +143,7 @@ export function Sidebar() {
   const { location } = useRouterState()
   const { username, plans, activePlanId, setActivePlan } =
     useProfileStore()
+  const isSuperadmin = useAuthStore((s) => s.user?.is_superadmin === true)
   const [showProfile, setShowProfile] = useState(false)
   const activePlan = plans.find((plan) => plan.id === activePlanId)
 
@@ -261,6 +263,30 @@ export function Sidebar() {
               </Link>
             )
           })}
+          {isSuperadmin && (() => {
+            const isActive = location.pathname.startsWith('/app/admin')
+            return (
+              <Link
+                to="/app/admin"
+                className={`cursor-pointer flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                  isActive
+                    ? 'bg-secondary/20 text-secondary-light border border-secondary/30'
+                    : 'text-white/55 hover:text-white hover:bg-white/6 border border-transparent'
+                }`}
+              >
+                <span className={isActive ? 'text-secondary-light' : 'text-white/40'}>
+                  <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </span>
+                Admin
+                {isActive && (
+                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-secondary-light" />
+                )}
+              </Link>
+            )
+          })()}
         </nav>
 
         {/* Footer */}
